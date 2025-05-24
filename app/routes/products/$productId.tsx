@@ -1,32 +1,26 @@
-import { salesforceQueries } from "@/integrations/salesforce/queries";
-import { useQuery } from "@tanstack/react-query";
+import { getProductQueryOptions } from "@/integrations/salesforce/options/products";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/products/$productId")({
   component: RouteComponent,
   loader: async ({ params, context }) => {
-    const { queryClient, salesforceClient } = context;
+    const { queryClient } = context;
 
-    // Pre-fetch product details
-    const productQuery = salesforceQueries
-      .products(salesforceClient)
-      .detail(params.productId, {
-        expand: ["prices", "images", "variations"],
-      });
-
-    await queryClient.ensureQueryData(productQuery);
-
-    return { productQuery };
+    await queryClient.ensureQueryData(
+      getProductQueryOptions({
+        productId: params.productId,
+      })
+    );
   },
 });
 
 function RouteComponent() {
-  const { productQuery } = Route.useLoaderData();
-  const { data: product, isLoading } = useQuery(productQuery);
+  const { productId } = Route.useParams();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { data: product, isLoading } = useSuspenseQuery(
+    getProductQueryOptions({ productId })
+  );
 
-  return <h1 className="text-4xl">{product?.name}</h1>;
+  return <h1 className="text-4xl">{product.name}</h1>;
 }

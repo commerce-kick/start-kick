@@ -7,13 +7,11 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { SalesforceClientProxy } from "@/integrations/salesforce/proxy";
 import appCss from "@/styles/app.css?url";
 import { QueryClient } from "@tanstack/react-query";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
-  salesforceClient: SalesforceClientProxy;
 }>()({
   head: () => ({
     meta: [

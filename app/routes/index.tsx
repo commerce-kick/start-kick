@@ -1,33 +1,29 @@
 // app/routes/index.tsx
-import { salesforceQueries } from "@/integrations/salesforce/queries";
-import { useQuery } from "@tanstack/react-query";
+import { getProductsQueryOptions } from "@/integrations/salesforce/options/products";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Home,
   loader: async ({ context, params }) => {
-    const { queryClient, salesforceClient } = context;
+    const { queryClient } = context;
 
-    const productsQuery = salesforceQueries.products(salesforceClient).list({
-      refine: ["cgid=root"],
-      limit: 10,
-    });
-
-    await queryClient.ensureQueryData(productsQuery);
-
-    return {
-      productsQuery,
-    };
+    await queryClient.ensureQueryData(
+      getProductsQueryOptions({
+        refine: ["cgid=root"],
+        limit: 10,
+      })
+    );
   },
 });
 
 function Home() {
-  const { productsQuery } = Route.useLoaderData();
-  const { data: products, isLoading } = useQuery(productsQuery);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { data: products } = useSuspenseQuery(
+    getProductsQueryOptions({
+      refine: ["cgid=root"],
+      limit: 10,
+    })
+  );
 
   return (
     <div>
