@@ -1,15 +1,20 @@
 // app/routes/__root.tsx
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { SalesforceClientProxy } from "@/integrations/salesforce/proxy";
 import appCss from "@/styles/app.css?url";
+import { QueryClient } from "@tanstack/react-query";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+  salesforceClient: SalesforceClientProxy;
+}>()({
   head: () => ({
     meta: [
       {

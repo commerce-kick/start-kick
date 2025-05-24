@@ -1,49 +1,54 @@
 // app/routes/index.tsx
-import { Button } from "@/components/ui/button";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import * as fs from "node:fs";
-
-const filePath = "count.txt";
-
-async function readCount() {
-  return parseInt(
-    await fs.promises.readFile(filePath, "utf-8").catch(() => "0")
-  );
-}
-
-const getCount = createServerFn({
-  method: "GET",
-}).handler(() => {
-  return readCount();
-});
-
-const updateCount = createServerFn({ method: "POST" })
-  .validator((d: number) => d)
-  .handler(async ({ data }) => {
-    const count = await readCount();
-    await fs.promises.writeFile(filePath, `${count + data}`);
-  });
+import { salesforceQueries } from "@/integrations/salesforce/queries";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Home,
-  loader: async () => await getCount(),
+  loader: async ({ context, params }) => {
+    const { queryClient, salesforceClient } = context;
+
+    const productsQuery = salesforceQueries.products(salesforceClient).list({
+      refine: ["cgid=root"],
+      limit: 10,
+    });
+
+    await queryClient.ensureQueryData(productsQuery);
+
+    return {
+      productsQuery,
+    };
+  },
 });
 
 function Home() {
-  const router = useRouter();
-  const state = Route.useLoaderData();
+  const { productsQuery } = Route.useLoaderData();
+  const { data: products, isLoading } = useQuery(productsQuery);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Button
-      type="button"
-      onClick={() => {
-        updateCount({ data: 1 }).then(() => {
-          router.invalidate();
-        });
-      }}
-    >
-      Add 1 to {state}?
-    </Button>
+    <div>
+      {products?.hits?.map((product) => {
+        return (
+          <div key={product.productId}>
+            <h2>{product.productName}</h2>
+            <p>{product.price}</p>
+            <Link
+              to="/products/$productId"
+              params={{
+                productId: product.productId,
+              }}
+              className="block py-1 text-blue-800 hover:text-blue-600"
+              activeProps={{ className: "text-black font-bold" }}
+            >
+              View
+            </Link>
+          </div>
+        );
+      })}
+    </div>
   );
 }
