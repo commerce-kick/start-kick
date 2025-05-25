@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
 
@@ -17,16 +18,16 @@ export default function Navbar({
             <div className="hidden sm:block sm:ml-6">
               <div className="flex space-x-4">
                 {category?.categories?.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    to="/category/$categoryId"
-                    params={{
-                      categoryId: cat.id,
-                    }}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    {cat.id}
-                  </Link>
+                  <Button variant="outline" key={cat.id} asChild>
+                    <Link
+                      to="/category/$categoryId"
+                      params={{
+                        categoryId: cat.id,
+                      }}
+                    >
+                      {cat.id}
+                    </Link>
+                  </Button>
                 ))}
               </div>
             </div>

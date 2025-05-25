@@ -1,4 +1,5 @@
 // app/routes/index.tsx
+import { buttonVariants } from "@/components/ui/button";
 import { getProductsQueryOptions } from "@/integrations/salesforce/options/products";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -37,7 +38,9 @@ function Home() {
               params={{
                 productId: product.productId,
               }}
-              className="block py-1 text-blue-800 hover:text-blue-600"
+              className={buttonVariants({
+                variant: "default",
+              })}
               activeProps={{ className: "text-black font-bold" }}
             >
               View
