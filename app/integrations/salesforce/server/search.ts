@@ -19,14 +19,15 @@ export const searchProducts = createServerFn({ method: "GET" })
     });
   });
 
-export const getCategories = createServerFn({ method: "GET" })
-  .validator((data: { levels?: number } = {}) => data)
+export const getCategory = createServerFn({ method: "GET" })
+  .validator((data: { id: string; levels?: number }) => data)
   .handler(async ({ data }) => {
     const api = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
-    return await shopperProducts.getCategories({
+    return await shopperProducts.getCategory({
       parameters: {
-        levels: data.levels || 1,
+        id: data.id,
+        levels: data.levels || 2,
       },
     });
   });

@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
+import { Route as CategoryCategoryIdImport } from './routes/category/$categoryId'
 
 // Create/Update Routes
 
@@ -28,6 +29,12 @@ const ProductsProductIdRoute = ProductsProductIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const CategoryCategoryIdRoute = CategoryCategoryIdImport.update({
+  id: '/category/$categoryId',
+  path: '/category/$categoryId',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -37,6 +44,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/category/$categoryId': {
+      id: '/category/$categoryId'
+      path: '/category/$categoryId'
+      fullPath: '/category/$categoryId'
+      preLoaderRoute: typeof CategoryCategoryIdImport
       parentRoute: typeof rootRoute
     }
     '/products/$productId': {
@@ -53,36 +67,41 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/products/$productId'
+  fullPaths: '/' | '/category/$categoryId' | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/products/$productId'
-  id: '__root__' | '/' | '/products/$productId'
+  to: '/' | '/category/$categoryId' | '/products/$productId'
+  id: '__root__' | '/' | '/category/$categoryId' | '/products/$productId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoryCategoryIdRoute: CategoryCategoryIdRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
 }
 
@@ -97,11 +116,15 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/category/$categoryId",
         "/products/$productId"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/category/$categoryId": {
+      "filePath": "category/$categoryId.tsx"
     },
     "/products/$productId": {
       "filePath": "products/$productId.tsx"
