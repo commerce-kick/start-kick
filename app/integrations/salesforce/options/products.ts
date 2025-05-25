@@ -4,7 +4,11 @@ import {
 } from "@/integrations/salesforce/server/products";
 import { queryOptions } from "@tanstack/react-query";
 import { ShopperSearchTypes } from "commerce-sdk-isomorphic";
-export const getProductsQueryOptions = (params: any) => {
+export const getProductsQueryOptions = (params: {
+  refine?: string[];
+  limit?: number;
+  offset?: number;
+}) => {
   return queryOptions<ShopperSearchTypes.ProductSearchResult>({
     queryKey: ["products", "list", params],
     queryFn: async () => getProducts({ data: params }) as any,

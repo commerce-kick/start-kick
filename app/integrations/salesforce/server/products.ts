@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 export const getProducts = createServerFn({ method: "GET" })
   .validator(
-    (data: { refine?: string[]; limit?: number; offset?: number } = {}) => data
+    (data: { refine?: string[]; limit?: number; offset?: number }) => data
   )
   .handler(async ({ data }) => {
     const api = await getSalesforceAPI();
