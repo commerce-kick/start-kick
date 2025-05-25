@@ -18,7 +18,7 @@ export const Route = createFileRoute("/products/$productId")({
 function RouteComponent() {
   const { productId } = Route.useParams();
 
-  const { data: product, isLoading } = useSuspenseQuery(
+  const { data: product } = useSuspenseQuery(
     getProductQueryOptions({ productId })
   );
 

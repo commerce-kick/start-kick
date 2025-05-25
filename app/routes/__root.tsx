@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import Navbar from "@/components/nanbar";
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
 import appCss from "@/styles/app.css?url";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import { QueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -54,7 +54,7 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const { data } = useQuery(getCategoryQueryOptions({ id: "root", levels: 2 }));
+  const { data } = useSuspenseQuery(getCategoryQueryOptions({ id: "root", levels: 2 }));
 
   return (
     <html>
