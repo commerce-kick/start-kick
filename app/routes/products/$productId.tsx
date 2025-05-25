@@ -1,15 +1,31 @@
+import Price from "@/components/commerce/price";
 import { ProductImageGallery } from "@/components/commerce/product-image-gallery";
 import { ProductRecommendations } from "@/components/commerce/product-recommendations";
 import { ProductVariations } from "@/components/commerce/product-variations";
-import { Badge } from "@/components/ui/badge";
+import Rating from "@/components/commerce/rating";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import LoadingIndicator from "@/components/ui/loading-indicator";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getProductQueryOptions } from "@/integrations/salesforce/options/products";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Minus, Plus, Share2, ShoppingCart, Star, Truck } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  Heart,
+  Info,
+  Minus,
+  Plus,
+  Share2,
+  Truck,
+} from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/products/$productId")({
@@ -28,50 +44,22 @@ export const Route = createFileRoute("/products/$productId")({
 function RouteComponent() {
   const { productId } = Route.useParams();
 
-  const { data: product } = useSuspenseQuery(
+  const { data: product, isLoading } = useSuspenseQuery(
     getProductQueryOptions({ productId })
   );
-
-  const {
-    id,
-    name,
-    brand,
-    manufacturerName,
-    price,
-    priceMax,
-    currency = "USD",
-    shortDescription,
-    longDescription,
-    imageGroups,
-    variationAttributes,
-    inventory,
-    productPromotions,
-    recommendations,
-    minOrderQuantity = 1,
-    stepQuantity = 1,
-    unit,
-    manufacturerSku,
-    ean,
-    upc,
-  } = product;
+  
+  const { minOrderQuantity = 1, stepQuantity = 1 } = product;
 
   const [quantity, setQuantity] = useState(product.minOrderQuantity || 1);
   const [selectedVariations, setSelectedVariations] = useState<
     Record<string, string>
   >({});
 
-  const formatPrice = (amount?: number) => {
-    if (!amount) return null;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  };
-
   const isInStock =
-    inventory?.orderable !== false && inventory?.stockLevel !== 0;
-  const stockLevel = inventory?.stockLevel;
-  const promotion = productPromotions?.[0];
+    product.inventory?.orderable !== false &&
+    product.inventory?.stockLevel !== 0;
+  const stockLevel = product.inventory?.stockLevel;
+  const promotion = product.productPromotions?.[0];
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(minOrderQuantity, quantity + delta);
@@ -86,238 +74,279 @@ function RouteComponent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-2 gap-8 mb-12">
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      {/* Back button and breadcrumbs */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <Button variant="ghost" size="sm" className="w-fit" asChild>
+          <Link to="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to shopping
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Images */}
-        <div>
-          <ProductImageGallery imageGroups={imageGroups} productName={name} />
+
+        <div className="w-full rounded-xl overflow-hidden bg-muted/30 relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
+              <div className="bg-background p-4 rounded-lg shadow-lg flex items-center gap-2">
+                <LoadingIndicator />
+                <span>Updating product...</span>
+              </div>
+            </div>
+          )}
+          {product.imageGroups ? (
+            <ProductImageGallery imageGroups={product.imageGroups} />
+          ) : (
+            <div className="aspect-square bg-muted flex items-center justify-center">
+              <p className="text-muted-foreground">No image available</p>
+            </div>
+          )}
         </div>
 
         {/* Product Details */}
-        <div className="space-y-6">
-          {/* Brand and Name */}
-          <div className="space-y-2">
-            {brand && (
-              <p className="text-sm text-muted-foreground uppercase tracking-wide">
-                {brand}
-              </p>
-            )}
-            <h1 className="text-3xl font-bold">{name || `Product ${id}`}</h1>
-            {manufacturerName && manufacturerName !== brand && (
-              <p className="text-sm text-muted-foreground">
-                by {manufacturerName}
-              </p>
-            )}
-          </div>
-
-          {/* Rating */}
-          <div className="flex items-center gap-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-muted-foreground">
-              (4.2) • 127 reviews
-            </span>
-          </div>
-
-          {/* Price */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              {promotion?.promotionalPrice ? (
-                <>
-                  <span className="text-3xl font-bold text-red-600">
-                    {formatPrice(promotion.promotionalPrice)}
-                  </span>
-                  <span className="text-xl text-muted-foreground line-through">
-                    {formatPrice(price)}
-                  </span>
-                  <Badge variant="destructive">{promotion.calloutMsg}</Badge>
-                </>
-              ) : priceMax && priceMax !== price ? (
-                <span className="text-3xl font-bold">
-                  {formatPrice(price)} - {formatPrice(priceMax)}
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Rating rating={4} />
+                <span className="text-sm text-muted-foreground">
+                  (24 reviews)
                 </span>
-              ) : (
-                <span className="text-3xl font-bold">{formatPrice(price)}</span>
+              </div>
+              <div className="flex gap-4 items-center">
+                {isLoading && <LoadingIndicator />}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Share this product</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+
+            <h1 className="text-3xl font-bold tracking-tight">
+              {product.productName}
+            </h1>
+
+            <Price
+              price={product.price}
+              currency={product.currency}
+              priceMax={product.priceMax}
+              unit={product.unit}
+              promotion={promotion}
+            />
+
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                Item No. {product.id}
+              </p>
+              {product.uuid && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <Info className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">UUID: {product.uuid}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </div>
-            {unit && (
-              <p className="text-sm text-muted-foreground">Price per {unit}</p>
-            )}
           </div>
 
-          {/* Short Description */}
-          {shortDescription && (
-            <p className="text-muted-foreground">{shortDescription}</p>
-          )}
+          <Separator />
 
-          {/* Stock Status */}
-          <div className="flex items-center gap-2">
-            {isInStock ? (
-              <>
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                <span className="text-sm text-green-600">In Stock</span>
-                {stockLevel && stockLevel < 10 && (
-                  <span className="text-sm text-orange-600">
-                    ({stockLevel} left)
+          <div className="space-y-6">
+            {product.variationAttributes &&
+              product.variationAttributes.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="font-medium">Options</h3>
+                  <ProductVariations
+                    variationAttributes={product.variationAttributes}
+                    onVariationChange={setSelectedVariations}
+                  />
+                </div>
+              )}
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">Quantity</h3>
+                <div className="flex items-center gap-2">
+                  {isInStock ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <span className="text-sm text-green-600">In Stock</span>
+                      {stockLevel && stockLevel < 10 && (
+                        <span className="text-sm text-orange-600">
+                          ({stockLevel} left)
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 bg-red-500 rounded-full" />
+                      <span className="text-sm text-red-600">Out of Stock</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Quantity and Add to Cart */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border rounded-md">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleQuantityChange(-stepQuantity)}
+                    disabled={quantity <= minOrderQuantity}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="px-4 py-2 min-w-[60px] text-center">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleQuantityChange(stepQuantity)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {minOrderQuantity > 1 && (
+                  <span className="text-sm text-muted-foreground">
+                    Min. order: {minOrderQuantity}
                   </span>
                 )}
-              </>
-            ) : (
-              <>
-                <div className="w-2 h-2 bg-red-500 rounded-full" />
-                <span className="text-sm text-red-600">Out of Stock</span>
-              </>
+              </div>
+            </div>
+
+            <div className="flex sm:flex-row gap-3">
+              <Button size="lg" className="flex-1" onClick={() => {}}>
+                {/* {addToCart.isPending ? (
+                  <LoadingIndicator />
+                ) : (
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                )} */}
+                <span className="ml-2">Add to Cart</span>
+              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="lg" className="flex-none">
+                      <Heart className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add to wishlist</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-4 flex items-center gap-3">
+              <Truck className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Free shipping</p>
+                <p className="text-xs text-muted-foreground">
+                  Delivery in 2-4 business days
+                </p>
+              </div>
+            </div>
+
+            {product.shortDescription && (
+              <div className="text-sm text-muted-foreground">
+                <p>{product.shortDescription}</p>
+              </div>
             )}
           </div>
-
-          {/* Variations */}
-          <ProductVariations
-            variationAttributes={variationAttributes}
-            onVariationChange={setSelectedVariations}
-          />
-
-          {/* Quantity and Add to Cart */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border rounded-md">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleQuantityChange(-stepQuantity)}
-                  disabled={quantity <= minOrderQuantity}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="px-4 py-2 min-w-[60px] text-center">
-                  {quantity}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleQuantityChange(stepQuantity)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              {minOrderQuantity > 1 && (
-                <span className="text-sm text-muted-foreground">
-                  Min. order: {minOrderQuantity}
-                </span>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <Button className="flex-1" disabled={!isInStock} size="lg">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
-              </Button>
-              <Button variant="outline" size="lg">
-                <Heart className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="lg">
-                <Share2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Shipping Info */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-green-600" />
-                <span className="text-sm">
-                  Free shipping on orders over $50
-                </span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
-      {/* Product Details Tabs */}
-      <Tabs defaultValue="description" className="mb-12">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="specifications">Specifications</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="description" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose max-w-none">
-                {longDescription ? (
-                  <div dangerouslySetInnerHTML={{ __html: longDescription }} />
-                ) : (
-                  <p>No detailed description available.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="specifications" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Specifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                {manufacturerSku && (
-                  <div className="flex justify-between">
-                    <span className="font-medium">Manufacturer SKU:</span>
-                    <span>{manufacturerSku}</span>
-                  </div>
-                )}
-                {ean && (
-                  <div className="flex justify-between">
-                    <span className="font-medium">EAN:</span>
-                    <span>{ean}</span>
-                  </div>
-                )}
-                {upc && (
-                  <div className="flex justify-between">
-                    <span className="font-medium">UPC:</span>
-                    <span>{upc}</span>
-                  </div>
-                )}
-                <Separator />
-                <div className="flex justify-between">
-                  <span className="font-medium">Product ID:</span>
-                  <span>{id}</span>
+      {/* Product Information Tabs */}
+      <div className="mt-12">
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="specifications">Specifications</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          </TabsList>
+          <TabsContent value="description" className="mt-6">
+            <Card>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  {product.longDescription ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: product.longDescription,
+                      }}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No description available
+                    </p>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="specifications" className="mt-6">
+            <Card>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Material</p>
+                    <p className="text-sm text-muted-foreground">
+                      Premium cotton blend
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Weight</p>
+                    <p className="text-sm text-muted-foreground">0.5 kg</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Dimensions</p>
+                    <p className="text-sm text-muted-foreground">
+                      10 × 5 × 2 cm
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Care Instructions</p>
+                    <p className="text-sm text-muted-foreground">
+                      Machine wash cold
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="reviews" className="mt-6">
+            <Card>
+              <CardContent>
+                <p className="text-center text-muted-foreground py-8">
+                  No reviews yet
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
-        <TabsContent value="reviews" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer Reviews</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Reviews feature coming soon...
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Recommendations */}
       <ProductRecommendations
-        recommendations={recommendations}
-        currency={currency}
+        recommendations={product.recommendations}
+        currency={product.currency}
       />
     </div>
   );

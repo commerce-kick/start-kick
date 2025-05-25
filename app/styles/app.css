@@ -113,6 +113,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

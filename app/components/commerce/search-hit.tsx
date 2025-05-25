@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
 import Image from "@/components/ui/image";
 import { Link } from "@tanstack/react-router";
@@ -15,8 +15,8 @@ interface ProductCardProps {
   product: ShopperSearchTypes.ProductSearchHit;
 }
 
-export default function SearchHit({ product }: ProductCardProps) {
-  const {
+export default function SearchHit({
+  product: {
     productId,
     productName,
     image,
@@ -26,10 +26,9 @@ export default function SearchHit({ product }: ProductCardProps) {
     orderable = true,
     productPromotions,
     imageGroups,
-    variationAttributes,
     priceRanges,
-  } = product;
-
+  },
+}: ProductCardProps) {
   // Get the primary image
   const primaryImage =
     image?.link || imageGroups?.[0]?.images?.[0]?.link || "/placeholder.svg";
@@ -52,13 +51,6 @@ export default function SearchHit({ product }: ProductCardProps) {
   // Get promotion info
   const promotion = productPromotions?.[0];
 
-  // Get color variations
-  const colorAttribute = variationAttributes?.find(
-    (attr) =>
-      attr.id?.toLowerCase().includes("color") ||
-      attr.name?.toLowerCase().includes("color")
-  );
-
   return (
     <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 pt-0">
       <CardHeader className="p-0">
@@ -67,7 +59,6 @@ export default function SearchHit({ product }: ProductCardProps) {
             src={primaryImage || "/placeholder.svg"}
             alt={imageAlt}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
           {/* Promotion badge */}
@@ -106,27 +97,6 @@ export default function SearchHit({ product }: ProductCardProps) {
         <h3 className="font-semibold text-sm">
           {productName || `Product ${productId}`}
         </h3>
-
-        {/* Color variations */}
-        {colorAttribute?.values && colorAttribute.values.length > 0 && (
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground mr-1">Colors:</span>
-            <div className="flex gap-1">
-              {colorAttribute.values.slice(0, 4).map((color, index) => (
-                <div
-                  key={index}
-                  className="w-4 h-4 rounded-full border border-gray-200 bg-gray-100"
-                  title={color.name}
-                />
-              ))}
-              {colorAttribute.values.length > 4 && (
-                <span className="text-xs text-muted-foreground ml-1">
-                  +{colorAttribute.values.length - 4}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Rating placeholder */}
         <div className="flex items-center gap-1">

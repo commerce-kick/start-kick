@@ -1,4 +1,3 @@
-// app/routes/__root.tsx
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -7,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import Navbar from "@/components/nanbar";
+import { Header } from "@/components/commerce/header";
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
 import appCss from "@/styles/app.css?url";
 import { QueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -54,7 +53,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const { data } = useSuspenseQuery(getCategoryQueryOptions({ id: "root", levels: 2 }));
+  const { data } = useSuspenseQuery(
+    getCategoryQueryOptions({ id: "root", levels: 2 })
+  );
 
   return (
     <html>
@@ -62,8 +63,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        <Navbar category={data} />
-        {children}
+        {data.categories && <Header categories={data.categories} />}
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-grow"> {children}</main>
+        </div>
         <Scripts />
       </body>
     </html>
