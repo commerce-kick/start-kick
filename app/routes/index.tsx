@@ -83,10 +83,10 @@ function Home() {
             animation="fadeIn"
             className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
           >
-            The React Starter Store for Retail
+            The Start Starter Store for Retail
           </TextAnimate>
           <p className="text-lg text-muted-foreground">
-            A modern, high-performance e-commerce starter kit built with Inertia
+            A modern, high-performance e-commerce starter kit built with TanStack Start
             and shadcn/ui
           </p>
           <Button size="lg" className="mt-4">
