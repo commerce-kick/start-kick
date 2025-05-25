@@ -30,12 +30,12 @@ export function Footer() {
   };
 
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="bg-muted/30 border-t">
       {/* Newsletter Section */}
       <div className="bg-primary/5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8  container mx-auto py-12 ">
+        <div className="container mx-auto flex flex-col items-center justify-between gap-8 py-12 md:flex-row">
           <div className="max-w-md">
-            <h2 className="text-2xl font-bold mb-2">Stay in the loop</h2>
+            <h2 className="mb-2 text-2xl font-bold">Stay in the loop</h2>
             <p className="text-muted-foreground">
               Subscribe to our newsletter for the latest products, promotions,
               and exclusive offers.
@@ -44,7 +44,7 @@ export function Footer() {
           <div className="w-full md:w-auto">
             <form
               onSubmit={handleSubscribe}
-              className="flex flex-col sm:flex-row gap-3 w-full md:w-auto"
+              className="flex w-full flex-col gap-3 sm:flex-row md:w-auto"
             >
               <Input
                 type="email"
@@ -64,11 +64,11 @@ export function Footer() {
 
       {/* Main Footer */}
       <div className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
             {/* Brand Column */}
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-6">
+              <div className="mb-6 flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -77,7 +77,7 @@ export function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-8 w-8 text-primary"
+                  className="text-primary h-8 w-8"
                 >
                   <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
                   <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9" />
@@ -93,15 +93,15 @@ export function Footer() {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <MapPin className="text-primary mt-0.5 h-5 w-5" />
                   <div>
                     <h4 className="font-medium">Find a Store</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Use our store locator to find the closest store near you.
                     </p>
                     <Link
                       to="/"
-                      className="text-sm text-primary hover:underline inline-block mt-1"
+                      className="text-primary mt-1 inline-block text-sm hover:underline"
                     >
                       Find stores
                     </Link>
@@ -109,15 +109,15 @@ export function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-primary mt-0.5" />
+                  <Phone className="text-primary mt-0.5 h-5 w-5" />
                   <div>
                     <h4 className="font-medium">Call Us</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Mon-Fri: 8am-8pm, Sat-Sun: 9am-6pm
                     </p>
                     <a
                       href="tel:+18001234567"
-                      className="text-sm text-primary hover:underline inline-block mt-1"
+                      className="text-primary mt-1 inline-block text-sm hover:underline"
                     >
                       1-800-123-4567
                     </a>
@@ -125,15 +125,15 @@ export function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-primary mt-0.5" />
+                  <Mail className="text-primary mt-0.5 h-5 w-5" />
                   <div>
                     <h4 className="font-medium">Email Us</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       We'll respond within 24 hours
                     </p>
                     <a
                       href="mailto:support@acme.com"
-                      className="text-sm text-primary hover:underline inline-block mt-1"
+                      className="text-primary mt-1 inline-block text-sm hover:underline"
                     >
                       support@acme.com
                     </a>
@@ -144,7 +144,7 @@ export function Footer() {
 
             {/* Links Columns */}
             <div>
-              <h3 className="font-bold text-lg mb-4">Account</h3>
+              <h3 className="mb-4 text-lg font-bold">Account</h3>
               <ul className="space-y-3">
                 <li>
                   <Link
@@ -182,7 +182,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4">Customer Service</h3>
+              <h3 className="mb-4 text-lg font-bold">Customer Service</h3>
               <ul className="space-y-3">
                 <li>
                   <Link
@@ -228,7 +228,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4">About</h3>
+              <h3 className="mb-4 text-lg font-bold">About</h3>
               <ul className="space-y-3">
                 <li>
                   <Link
@@ -275,24 +275,24 @@ export function Footer() {
           </div>
 
           {/* Social and Payment */}
-          <div className="mt-12 pt-8 border-t">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="mt-12 border-t pt-8">
+            <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   We accept:
                 </span>
                 <div className="flex gap-2">
                   {/* Payment Icons */}
-                  <div className="h-8 w-12 bg-muted rounded flex items-center justify-center">
+                  <div className="bg-muted flex h-8 w-12 items-center justify-center rounded">
                     <span className="text-xs font-medium">Visa</span>
                   </div>
-                  <div className="h-8 w-12 bg-muted rounded flex items-center justify-center">
+                  <div className="bg-muted flex h-8 w-12 items-center justify-center rounded">
                     <span className="text-xs font-medium">MC</span>
                   </div>
-                  <div className="h-8 w-12 bg-muted rounded flex items-center justify-center">
+                  <div className="bg-muted flex h-8 w-12 items-center justify-center rounded">
                     <span className="text-xs font-medium">Amex</span>
                   </div>
-                  <div className="h-8 w-12 bg-muted rounded flex items-center justify-center">
+                  <div className="bg-muted flex h-8 w-12 items-center justify-center rounded">
                     <span className="text-xs font-medium">PayPal</span>
                   </div>
                 </div>
@@ -303,10 +303,10 @@ export function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="border-t py-6 bg-muted/50">
+      <div className="bg-muted/50 border-t py-6">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-center md:text-left text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="text-muted-foreground text-center text-sm md:text-left">
               <p>© 2004-2024 Acme Inc. All Rights Reserved.</p>
               <p className="mt-1">
                 This is a demo store only. Orders made will NOT be processed.
@@ -340,7 +340,7 @@ export function Footer() {
       <Button
         onClick={scrollToTop}
         size="icon"
-        className="fixed bottom-6 right-6 h-10 w-10 rounded-full shadow-md z-20"
+        className="fixed right-6 bottom-6 z-20 h-10 w-10 rounded-full shadow-md"
         aria-label="Back to top"
       >
         <ArrowUp className="h-5 w-5" />
