@@ -2,11 +2,15 @@
 import {
   authenticateCustomer,
   logoutCustomer,
+  registerCustomer,
 } from "@/integrations/salesforce/server/customer";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 
 export function useSalesforceAuth() {
   const queryClient = useQueryClient();
+
+  const router = useRouter();
 
   const loginMutation = useMutation({
     mutationFn: ({
@@ -17,21 +21,46 @@ export function useSalesforceAuth() {
       password: string;
     }) => authenticateCustomer({ data: { username, password } }),
     onSuccess: () => {
-      // Invalidate all queries to refetch with new auth
       queryClient.invalidateQueries();
+      router.navigate({
+        to: "/",
+        replace: true,
+      });
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: (formData: {
+      data: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        password: string;
+      };
+    }) => registerCustomer(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      router.navigate({
+        to: "/",
+        replace: true,
+      });
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: () => logoutCustomer({}),
     onSuccess: () => {
-      // Invalidate all queries to refetch as guest
       queryClient.invalidateQueries();
+      router.navigate({
+        to: "/",
+        replace: true,
+      });
     },
   });
 
   return {
     loginMutation,
     logoutMutation,
+    registerMutation,
   };
 }

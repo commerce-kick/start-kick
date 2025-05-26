@@ -4,10 +4,10 @@ import { createServerFn } from "@tanstack/react-start";
 export const searchProducts = createServerFn({ method: "GET" })
   .validator(
     (data: { q: string; refine?: string[]; limit?: number; offset?: number }) =>
-      data
+      data,
   )
   .handler(async ({ data }) => {
-    const api = await getSalesforceAPI();
+    const { api } = await getSalesforceAPI();
     const shopperSearch = await api.shopperSearch();
     return await shopperSearch.productSearch({
       parameters: {
@@ -22,7 +22,7 @@ export const searchProducts = createServerFn({ method: "GET" })
 export const getCategory = createServerFn({ method: "GET" })
   .validator((data: { id: string; levels?: number }) => data)
   .handler(async ({ data }) => {
-    const api = await getSalesforceAPI();
+    const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
     return await shopperProducts.getCategory({
       parameters: {

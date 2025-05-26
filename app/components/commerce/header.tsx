@@ -26,6 +26,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useSalesforceAuth } from "@/hooks/use-salesforce-auth";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { Link } from "@tanstack/react-router";
 import {
@@ -136,6 +137,7 @@ export function CommerceNavigation({ categories }: CommerceNavigationProps) {
                       key={subCategory.id}
                       title={subCategory.name || "Unnamed Subcategory"}
                       to="/category/$categoryId"
+                      //@ts-ignore
                       params={{ categoryId: subCategory.id }}
                     >
                       {subCategory.description}
@@ -180,7 +182,13 @@ const ListItem = React.forwardRef<
 
 ListItem.displayName = "ListItem";
 
-const DropDownUser = ({ user }: { user: ShopperCustomersTypes.Customer }) => {
+const DropDownUser = ({
+  user,
+  handleLogOut,
+}: {
+  user: ShopperCustomersTypes.Customer;
+  handleLogOut: () => void;
+}) => {
   const initials =
     `${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`.toUpperCase();
 
@@ -222,16 +230,10 @@ const DropDownUser = ({ user }: { user: ShopperCustomersTypes.Customer }) => {
             <span>Loyalty</span>
           </Link>
         </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link
-            to="/"
-            className="flex cursor-pointer items-center text-red-500 hover:text-red-600"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </Link>
+        <DropdownMenuSeparator />{" "}
+        <DropdownMenuItem onClick={handleLogOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -320,7 +322,11 @@ export function Header({
   categories: ShopperProductsTypes.Category[];
   user?: ShopperCustomersTypes.Customer;
 }) {
+  const { logoutMutation } = useSalesforceAuth();
 
+  const handleLogOut = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
@@ -348,7 +354,7 @@ export function Header({
           <CommerceNavigation categories={categories} />
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
-          {!user?.firstName ? (
+          {!user?.authType ? (
             <Button asChild variant="ghost" size="sm" className="gap-2">
               <Link to="/login">
                 <User className="h-4 w-4" />
@@ -356,7 +362,7 @@ export function Header({
               </Link>
             </Button>
           ) : (
-            <DropDownUser user={user} />
+            <DropDownUser user={user} handleLogOut={handleLogOut} />
           )}
         </div>
       </div>

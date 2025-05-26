@@ -209,6 +209,174 @@ function LoginForm({
   );
 }
 
+function RegisterForm({
+  form,
+  onSubmit,
+  isLoading,
+  onRegisterClick,
+}: {
+  form: any;
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
+  onRegisterClick?: () => void;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col items-center text-center">
+            <h1 className="text-2xl font-bold">Create a new account</h1>
+            <p className="text-muted-foreground text-balance">
+              Login to your Acme Inc account
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                      <Input
+                        placeholder="First Name"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                      <Input
+                        placeholder="Last Name"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                      placeholder="example@mail.com"
+                      className="pl-10"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Password</FormLabel>
+                  <a href="#" className="text-primary text-xs hover:underline">
+                    Forgot password?
+                  </a>
+                </div>
+                <FormControl>
+                  <div className="relative">
+                    <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="pl-10"
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        Toggle password visibility
+                      </span>
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="rememberMe"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Sign me up for Salesforce emails (you can unsubscribe at any
+                    time)
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 function RouteComponent() {
   const form = useForm({
     resolver: zodResolver(
@@ -219,7 +387,18 @@ function RouteComponent() {
     ),
   });
 
-  const { loginMutation } = useSalesforceAuth();
+  const registerForm = useForm({
+    resolver: zodResolver(
+      z.object({
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string(),
+        password: z.string(),
+      }),
+    ),
+  });
+
+  const { loginMutation, registerMutation } = useSalesforceAuth();
 
   return (
     <div className="from-background to-muted flex min-h-svh flex-col items-center justify-center bg-gradient-to-tr p-4 md:p-10">
@@ -260,12 +439,22 @@ function RouteComponent() {
                   onSubmit={form.handleSubmit((data) => {
                     loginMutation.mutate(data);
                   })}
-                  isLoading={false}
+                  isLoading={loginMutation.isPending}
                 />
               </div>
 
               {/* Register Form */}
-              <div className="from-muted/50 to-muted/20 bg-gradient-to-br p-8"></div>
+              <div className="from-muted/50 to-muted/20 bg-gradient-to-br p-8">
+                <RegisterForm
+                  form={registerForm}
+                  onSubmit={registerForm.handleSubmit((data) => {
+                    registerMutation.mutate({
+                      data,
+                    });
+                  })}
+                  isLoading={registerMutation.isPending}
+                />
+              </div>
             </CardContent>
           </Card>
 

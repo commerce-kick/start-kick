@@ -45,7 +45,7 @@ export class SalesforceCommerceClient {
     await this.authenticateAsGuest();
   }
 
-  private async authenticateAsGuest(): Promise<void> {
+  async authenticateAsGuest(): Promise<void> {
     const response = await helpers.loginGuestUser(this.shopperLogin, {
       redirectURI: `${process.env.VITE_APP_URL || "http://localhost:3000"}/callback`,
     });
@@ -100,7 +100,19 @@ export class SalesforceCommerceClient {
   }
 
   async logout(): Promise<void> {
-    await this.sessionManager.clearTokens();
+    const response = await helpers.loginGuestUser(
+      this.shopperLogin,
+      {
+        redirectURI: "http://localhost:3000/callback",
+      },
+    );
+
+    await this.sessionManager.saveTokens({
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token,
+      tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
+      customerId: response.customer_id,
+    });
   }
 
   async clearAllAuthentication(): Promise<void> {

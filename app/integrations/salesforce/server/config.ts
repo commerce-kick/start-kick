@@ -12,5 +12,8 @@ export const salesforceConfig = {
 export async function getSalesforceAPI() {
   const session = await useAppSession();
   const client = new SalesforceCommerceClient(salesforceConfig, session);
-  return new SalesforceAPI(client, salesforceConfig);
+  return {
+    api: new SalesforceAPI(client, salesforceConfig),
+    client,
+  };
 }

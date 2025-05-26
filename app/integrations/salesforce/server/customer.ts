@@ -15,11 +15,40 @@ export const authenticateCustomer = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+export const registerCustomer = createServerFn({ method: "POST" })
+  .validator(
+    (data: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      password: string;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    const { api, client } = await getSalesforceAPI();
+    const shopperCustomers = await api.shopperCustomers();
+
+    await shopperCustomers.registerCustomer({
+      parameters: {},
+      body: {
+        customer: {
+          login: data.email,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        },
+        password: data.password,
+      },
+    });
+
+    return await client.authenticateCustomer(data.email, data.password);
+  });
+
 export const logoutCustomer = createServerFn({ method: "POST" }).handler(
   async () => {
     const session = await useAppSession();
     const client = new SalesforceCommerceClient(salesforceConfig, session);
-    await client.logout();
+    await client.authenticateAsGuest();
     return { success: true };
   },
 );
@@ -27,7 +56,7 @@ export const logoutCustomer = createServerFn({ method: "POST" }).handler(
 export const getCustomer = createServerFn({ method: "GET" }).handler(
   async () => {
     const { data } = await useAppSession();
-    const api = await getSalesforceAPI();
+    const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperCustomers();
     return await shopperProducts.getCustomer({
       parameters: {
