@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { Link } from "@tanstack/react-router";
 import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
-import { Home, Menu } from "lucide-react";
+import { Home, Menu, User } from "lucide-react";
 
 interface CommerceNavigationProps {
   categories: ShopperProductsTypes.Category[];
@@ -56,7 +56,7 @@ export function CommerceNavigation({ categories }: CommerceNavigationProps) {
 
           // Check if this is a complex category (has nested subcategories)
           const isComplexCategory = category.categories?.some(
-            (subCat) => subCat.categories && subCat.categories.length > 0
+            (subCat) => subCat.categories && subCat.categories.length > 0,
           );
 
           if (isComplexCategory) {
@@ -73,12 +73,12 @@ export function CommerceNavigation({ categories }: CommerceNavigationProps) {
                         <Link
                           to="/category/$categoryId"
                           params={{ categoryId: category.id }}
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-6 no-underline outline-none select-none focus:shadow-md"
                         >
-                          <div className="mb-2 mt-4 text-lg font-medium">
+                          <div className="mt-4 mb-2 text-lg font-medium">
                             {category.name} Collection
                           </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
+                          <p className="text-muted-foreground text-sm leading-tight">
                             {category.description ||
                               `Discover our latest ${category.name?.toLowerCase()} styles and accessories.`}
                           </p>
@@ -87,7 +87,7 @@ export function CommerceNavigation({ categories }: CommerceNavigationProps) {
                     </div>
                     {category.categories?.map((subCategory) => (
                       <div key={subCategory.id} className="space-y-2">
-                        <h4 className="text-sm font-medium leading-none">
+                        <h4 className="text-sm leading-none font-medium">
                           {subCategory.name || "Unnamed Subcategory"}
                         </h4>
                         <ul className="space-y-2 text-sm">
@@ -149,14 +149,14 @@ const ListItem = React.forwardRef<
         <Link
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
+            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block space-y-1 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none",
+            className,
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="text-sm leading-none font-medium">{title}</div>
           {children && (
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
               {children}
             </p>
           )}
@@ -189,7 +189,7 @@ const MobileNav = ({
         to={"/category/$categoryId"}
         params={{ categoryId: category.id }}
         className={`flex items-center py-2 text-base font-medium ${
-          level > 0 ? "pl-6 text-sm text-muted-foreground" : ""
+          level > 0 ? "text-muted-foreground pl-6 text-sm" : ""
         }`}
         onClick={() => setOpen(false)}
       >
@@ -218,8 +218,8 @@ const MobileNav = ({
           <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
-        <SheetHeader className="px-6 py-4 border-b">
+      <SheetContent side="left" className="w-[300px] p-0 sm:w-[350px]">
+        <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <div className="px-6 py-4">
@@ -249,12 +249,12 @@ export function Header({
   categories: ShopperProductsTypes.Category[];
 }) {
   return (
-    <header className="w-full sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between">
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-3">
           <MobileNav categories={categories} />
-          
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl">
+
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -263,7 +263,7 @@ export function Header({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-6 w-6 text-primary"
+              className="text-primary h-6 w-6"
             >
               <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
               <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9" />
@@ -272,6 +272,14 @@ export function Header({
             <span>Acme</span>
           </Link>
           <CommerceNavigation categories={categories} />
+        </div>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button asChild variant="ghost" size="sm" className="gap-2">
+            <Link to="/login">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Login</span>
+            </Link>
+          </Button>
         </div>
       </div>
     </header>

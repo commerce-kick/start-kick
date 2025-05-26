@@ -1,5 +1,8 @@
 import { SalesforceCommerceClient } from "@/integrations/salesforce/client";
-import { salesforceConfig } from "@/integrations/salesforce/server/config";
+import {
+  getSalesforceAPI,
+  salesforceConfig,
+} from "@/integrations/salesforce/server/config";
 import { useAppSession } from "@/utils/session";
 import { createServerFn } from "@tanstack/react-start";
 
@@ -18,17 +21,18 @@ export const logoutCustomer = createServerFn({ method: "POST" }).handler(
     const client = new SalesforceCommerceClient(salesforceConfig, session);
     await client.logout();
     return { success: true };
-  }
+  },
 );
 
-export const getAuthStatus = createServerFn({ method: "GET" }).handler(
+export const getCustomer = createServerFn({ method: "GET" }).handler(
   async () => {
-    const session = await useAppSession();
-    const client = new SalesforceCommerceClient(salesforceConfig, session);
-    return {
-      isAuthenticated: await client.isAuthenticated(),
-      isCustomerAuthenticated: await client.isCustomerAuthenticated(),
-      customerId: await client.getCustomerId(),
-    };
-  }
+    const { data } = await useAppSession();
+    const api = await getSalesforceAPI();
+    const shopperProducts = await api.shopperCustomers();
+    return await shopperProducts.getCustomer({
+      parameters: {
+        customerId: data.customerId,
+      },
+    });
+  },
 );

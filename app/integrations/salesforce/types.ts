@@ -12,11 +12,8 @@ export interface IntegrationConfig {
 }
 
 export interface SalesforceSessionData {
-  salesforce?: {
-    accessToken: string;
-    refreshToken?: string;
-    tokenExpiry: number;
-    customerToken?: string;
-    customerId?: string;
-  };
+  accessToken: string;
+  refreshToken?: string;
+  tokenExpiry: number;
+  customerId?: string;
 }

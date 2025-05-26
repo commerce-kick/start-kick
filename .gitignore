@@ -9,6 +9,9 @@ yarn.lock
 .output
 .vinxi
 
+
+routeTree.gen.ts
+
 /build/
 /api/
 /server/build

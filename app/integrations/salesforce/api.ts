@@ -58,28 +58,28 @@ export class SalesforceAPI {
   async shopperBaskets() {
     return this.getClient<SDK.ShopperBaskets<any>>(
       ShopperBaskets,
-      "shopperBaskets"
+      "shopperBaskets",
     );
   }
 
   async shopperContexts() {
     return this.getClient<SDK.ShopperContexts<any>>(
       ShopperContexts,
-      "shopperContexts"
+      "shopperContexts",
     );
   }
 
   async shopperCustomers() {
     return this.getClient<SDK.ShopperCustomers<any>>(
       ShopperCustomers,
-      "shopperCustomers"
+      "shopperCustomers",
     );
   }
 
   async shopperExperience() {
     return this.getClient<SDK.ShopperExperience<any>>(
       ShopperExperience,
-      "shopperExperience"
+      "shopperExperience",
     );
   }
 
@@ -90,35 +90,35 @@ export class SalesforceAPI {
   async shopperOrders() {
     return this.getClient<SDK.ShopperOrders<any>>(
       ShopperOrders,
-      "shopperOrders"
+      "shopperOrders",
     );
   }
 
   async shopperProducts() {
     return this.getClient<SDK.ShopperProducts<any>>(
       ShopperProducts,
-      "shopperProducts"
+      "shopperProducts",
     );
   }
 
   async shopperPromotions() {
     return this.getClient<SDK.ShopperPromotions<any>>(
       ShopperPromotions,
-      "shopperPromotions"
+      "shopperPromotions",
     );
   }
 
   async shopperGiftCertificates() {
     return this.getClient<SDK.ShopperGiftCertificates<any>>(
       ShopperGiftCertificates,
-      "shopperGiftCertificates"
+      "shopperGiftCertificates",
     );
   }
 
   async shopperSearch() {
     return this.getClient<SDK.ShopperSearch<any>>(
       ShopperSearch,
-      "shopperSearch"
+      "shopperSearch",
     );
   }
 
@@ -129,22 +129,13 @@ export class SalesforceAPI {
   async shopperStores() {
     return this.getClient<SDK.ShopperStores<any>>(
       ShopperStores,
-      "shopperStores"
+      "shopperStores",
     );
   }
 
   // Helper method to manually refresh if needed
   async forceRefresh() {
     await this.refreshAuth();
-  }
-
-  // Get current auth status
-  getAuthStatus() {
-    return {
-      hasToken: !!this.authToken,
-      tokenExpired: this.tokenExpired(),
-      expiresAt: new Date(this.tokenExpiry).toISOString(),
-    };
   }
 
   // Clear all cached clients (useful for logout)

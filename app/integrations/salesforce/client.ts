@@ -27,9 +27,13 @@ export class SalesforceCommerceClient {
       return;
     }
 
+    console.log("Not valid token");
+
     const tokens = await this.sessionManager.getTokens();
     if (tokens?.refreshToken) {
       try {
+        console.log("Refresh token");
+
         await this.refreshAccessToken();
         return;
       } catch (error) {
@@ -37,6 +41,7 @@ export class SalesforceCommerceClient {
       }
     }
 
+    console.log("Login as guest");
     await this.authenticateAsGuest();
   }
 
@@ -48,6 +53,7 @@ export class SalesforceCommerceClient {
     await this.sessionManager.saveTokens({
       accessToken: response.access_token,
       refreshToken: response.refresh_token,
+      customerId: response.customer_id,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
     });
   }
@@ -62,39 +68,39 @@ export class SalesforceCommerceClient {
 
     await this.sessionManager.saveTokens({
       accessToken: response.access_token,
-      refreshToken: response.refresh_token || tokens.refreshToken,
+      refreshToken: response.refresh_token,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
-      customerToken: tokens.customerToken,
-      customerId: tokens.customerId,
+      customerId: response.customer_id,
     });
   }
 
   async authenticateCustomer(
     username: string,
-    password: string
+    password: string,
   ): Promise<void> {
     await this.ensureAuthenticated();
 
     const response = await helpers.loginRegisteredUserB2C(
       this.shopperLogin,
-      { username, password },
       {
-        redirectURI: `${process.env.VITE_APP_URL || "http://localhost:3000"}/callback`,
-      }
+        username: username,
+        password: password,
+      },
+      {
+        redirectURI: "http://localhost:3000/callback",
+      },
     );
 
-    const currentTokens = await this.sessionManager.getTokens();
     await this.sessionManager.saveTokens({
-      accessToken: currentTokens!.accessToken,
-      refreshToken: currentTokens!.refreshToken,
-      tokenExpiry: currentTokens!.tokenExpiry,
-      customerToken: response.access_token,
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token,
+      tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
       customerId: response.customer_id,
     });
   }
 
   async logout(): Promise<void> {
-    await this.sessionManager.clearCustomerTokens();
+    await this.sessionManager.clearTokens();
   }
 
   async clearAllAuthentication(): Promise<void> {
@@ -105,10 +111,6 @@ export class SalesforceCommerceClient {
     return await this.sessionManager.isTokenValid();
   }
 
-  async isCustomerAuthenticated(): Promise<boolean> {
-    return await this.sessionManager.isCustomerAuthenticated();
-  }
-
   async getCustomerId(): Promise<string | undefined> {
     const tokens = await this.sessionManager.getTokens();
     return tokens?.customerId;
@@ -117,6 +119,6 @@ export class SalesforceCommerceClient {
   async getAuthToken(): Promise<string> {
     await this.ensureAuthenticated();
     const tokens = await this.sessionManager.getTokens();
-    return tokens!.customerToken || tokens!.accessToken;
+    return tokens!.accessToken;
   }
 }

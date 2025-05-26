@@ -1,58 +1,57 @@
 export class SalesforceSessionManager {
-  private session: any
+  private session: any;
 
   constructor(session: any) {
-    this.session = session
+    this.session = session;
   }
 
   async getTokens() {
-    const data = await this.session.data
-    return data?.salesforce || null
+    const data = await this.session.data;
+    return data || null;
   }
 
   async saveTokens(tokenData: {
-    accessToken: string
-    refreshToken?: string
-    tokenExpiry: number
-    customerToken?: string
-    customerId?: string
+    accessToken: string;
+    customerId: string;
+    refreshToken: string;
+    tokenExpiry: number;
   }) {
-    const currentData = await this.session.data
+    console.log(
+      "Saving tokens - expires in:",
+      Math.round((tokenData.tokenExpiry - Date.now()) / 1000 / 60),
+      "minutes",
+    );
+
     await this.session.update({
-      ...currentData,
-      salesforce: { ...currentData?.salesforce, ...tokenData },
-    })
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken,
+      tokenExpiry: tokenData.tokenExpiry,
+      customerId: tokenData.customerId,
+    });
   }
 
   async clearTokens() {
-    const currentData = await this.session.data
-    await this.session.update({
-      ...currentData,
-      salesforce: undefined,
-    })
-  }
-
-  async clearCustomerTokens() {
-    const currentData = await this.session.data
-    if (currentData?.salesforce) {
-      await this.session.update({
-        ...currentData,
-        salesforce: {
-          ...currentData.salesforce,
-          customerToken: undefined,
-          customerId: undefined,
-        },
-      })
-    }
+    await this.session.update({});
   }
 
   async isTokenValid(): Promise<boolean> {
-    const tokens = await this.getTokens()
-    return !!(tokens?.accessToken && tokens?.tokenExpiry && Date.now() < tokens.tokenExpiry)
-  }
+    const tokens = await this.getTokens();
 
-  async isCustomerAuthenticated(): Promise<boolean> {
-    const tokens = await this.getTokens()
-    return !!(tokens?.customerToken && tokens?.customerId)
+    const isValid = !!(
+      tokens?.accessToken &&
+      tokens?.tokenExpiry &&
+      Date.now() < tokens.tokenExpiry
+    );
+
+    console.log(
+      "Token valid:",
+      isValid,
+      "expires in:",
+      tokens?.tokenExpiry
+        ? Math.round((tokens.tokenExpiry - Date.now()) / 1000 / 60) + " min"
+        : "no expiry",
+    );
+
+    return isValid;
   }
 }
