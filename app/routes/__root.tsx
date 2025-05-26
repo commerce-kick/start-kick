@@ -8,9 +8,10 @@ import type { ReactNode } from "react";
 
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
+import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
 import appCss from "@/styles/app.css?url";
-import { QueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { QueryClient, useSuspenseQueries } from "@tanstack/react-query";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -39,8 +40,10 @@ export const Route = createRootRouteWithContext<{
     const { queryClient } = context;
 
     queryClient.ensureQueryData(
-      getCategoryQueryOptions({ id: "root", levels: 2 })
+      getCategoryQueryOptions({ id: "root", levels: 2 }),
     );
+
+    queryClient.ensureQueryData(getCustomerQueryOptions());
   },
   component: RootComponent,
 });
@@ -54,9 +57,12 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const { data } = useSuspenseQuery(
-    getCategoryQueryOptions({ id: "root", levels: 2 })
-  );
+  const [{ data }, { data: user }] = useSuspenseQueries({
+    queries: [
+      getCategoryQueryOptions({ id: "root", levels: 2 }),
+      getCustomerQueryOptions(),
+    ],
+  });
 
   return (
     <html>
@@ -64,13 +70,13 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        {data.categories && <Header categories={data.categories} />}
-        <div className="flex flex-col min-h-screen">
+        {data.categories && <Header categories={data.categories} user={user} />}
+        <div className="flex min-h-screen flex-col">
           <main className="flex-grow"> {children}</main>
         </div>
 
         <Footer />
-        
+
         <Scripts />
       </body>
     </html>

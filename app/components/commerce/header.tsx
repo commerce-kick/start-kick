@@ -10,7 +10,15 @@ import {
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -18,9 +26,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { Link } from "@tanstack/react-router";
-import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
-import { Home, Menu, User } from "lucide-react";
+import {
+  ShopperCustomersTypes,
+  ShopperProductsTypes,
+} from "commerce-sdk-isomorphic";
+import { ChevronDown, Gift, Home, LogOut, Menu, User } from "lucide-react";
 
 interface CommerceNavigationProps {
   categories: ShopperProductsTypes.Category[];
@@ -168,6 +180,64 @@ const ListItem = React.forwardRef<
 
 ListItem.displayName = "ListItem";
 
+const DropDownUser = ({ user }: { user: ShopperCustomersTypes.Customer }) => {
+  const initials =
+    `${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`.toUpperCase();
+
+  return (
+    <DropdownMenu>
+      <Button variant="ghost" size="sm" className="gap-2" asChild>
+        <DropdownMenuTrigger>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <span className="hidden capitalize sm:inline">{user.firstName}</span>
+          <ChevronDown className="text-muted-foreground h-4 w-4" />
+        </DropdownMenuTrigger>
+      </Button>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm leading-none font-medium capitalize">
+              {user.firstName} {user.lastName}
+            </p>
+            <p className="text-muted-foreground text-xs leading-none">
+              {/* Add user email here if available */}
+              My Account
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/" className="flex cursor-pointer items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/" className="flex cursor-pointer items-center">
+            <Gift className="mr-2 h-4 w-4" />
+            <span>Loyalty</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            to="/"
+            className="flex cursor-pointer items-center text-red-500 hover:text-red-600"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 // Updated MobileNav component for mobile navigation
 const MobileNav = ({
   categories,
@@ -245,9 +315,13 @@ const MobileNav = ({
 // Complete Header component with updated typing
 export function Header({
   categories,
+  user,
 }: {
   categories: ShopperProductsTypes.Category[];
+  user?: ShopperCustomersTypes.Customer;
 }) {
+
+
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between">
@@ -274,12 +348,16 @@ export function Header({
           <CommerceNavigation categories={categories} />
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button asChild variant="ghost" size="sm" className="gap-2">
-            <Link to="/login">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Login</span>
-            </Link>
-          </Button>
+          {!user?.firstName ? (
+            <Button asChild variant="ghost" size="sm" className="gap-2">
+              <Link to="/login">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Login</span>
+              </Link>
+            </Button>
+          ) : (
+            <DropDownUser user={user} />
+          )}
         </div>
       </div>
     </header>

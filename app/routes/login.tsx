@@ -258,7 +258,6 @@ function RouteComponent() {
                 <LoginForm
                   form={form}
                   onSubmit={form.handleSubmit((data) => {
-                    console.log("here");
                     loginMutation.mutate(data);
                   })}
                   isLoading={false}
