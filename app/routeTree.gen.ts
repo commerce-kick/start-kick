@@ -12,15 +12,22 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
+import { Route as LayoutImport } from './routes/_layout'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as CategoryCategoryIdImport } from './routes/category/$categoryId'
+import { Route as LayoutAccountImport } from './routes/_layout/account'
 
 // Create/Update Routes
 
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LayoutRoute = LayoutImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -42,6 +49,12 @@ const CategoryCategoryIdRoute = CategoryCategoryIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LayoutAccountRoute = LayoutAccountImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -53,12 +66,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
+    }
+    '/_layout/account': {
+      id: '/_layout/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof LayoutAccountImport
+      parentRoute: typeof LayoutImport
     }
     '/category/$categoryId': {
       id: '/category/$categoryId'
@@ -79,16 +106,31 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface LayoutRouteChildren {
+  LayoutAccountRoute: typeof LayoutAccountRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutAccountRoute: LayoutAccountRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
+  '/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
+  '/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
@@ -96,20 +138,36 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
+  '/_layout/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/category/$categoryId' | '/products/$productId'
+  fullPaths:
+    | '/'
+    | ''
+    | '/login'
+    | '/account'
+    | '/category/$categoryId'
+    | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/category/$categoryId' | '/products/$productId'
+  to:
+    | '/'
+    | ''
+    | '/login'
+    | '/account'
+    | '/category/$categoryId'
+    | '/products/$productId'
   id:
     | '__root__'
     | '/'
+    | '/_layout'
     | '/login'
+    | '/_layout/account'
     | '/category/$categoryId'
     | '/products/$productId'
   fileRoutesById: FileRoutesById
@@ -117,6 +175,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   LoginRoute: typeof LoginRoute
   CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
@@ -124,6 +183,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   LoginRoute: LoginRoute,
   CategoryCategoryIdRoute: CategoryCategoryIdRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
@@ -140,6 +200,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/_layout",
         "/login",
         "/category/$categoryId",
         "/products/$productId"
@@ -148,8 +209,18 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.tsx"
     },
+    "/_layout": {
+      "filePath": "_layout.tsx",
+      "children": [
+        "/_layout/account"
+      ]
+    },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/_layout/account": {
+      "filePath": "_layout/account.tsx",
+      "parent": "/_layout"
     },
     "/category/$categoryId": {
       "filePath": "category/$categoryId.tsx"

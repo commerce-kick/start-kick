@@ -71,9 +71,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body>
         {data.categories && <Header categories={data.categories} user={user} />}
-        <div className="flex min-h-screen flex-col">
-          <main className="flex-grow"> {children}</main>
-        </div>
+        <div className="flex min-h-screen flex-col">{children}</div>
 
         <Footer />
 

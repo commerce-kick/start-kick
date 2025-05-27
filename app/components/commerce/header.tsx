@@ -33,7 +33,7 @@ import {
   ShopperCustomersTypes,
   ShopperProductsTypes,
 } from "commerce-sdk-isomorphic";
-import { ChevronDown, Gift, Home, LogOut, Menu, User } from "lucide-react";
+import { ChevronDown, Home, LogOut, Menu, User } from "lucide-react";
 
 interface CommerceNavigationProps {
   categories: ShopperProductsTypes.Category[];
@@ -219,15 +219,9 @@ const DropDownUser = ({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/" className="flex cursor-pointer items-center">
+          <Link to="/account" className="flex cursor-pointer items-center">
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/" className="flex cursor-pointer items-center">
-            <Gift className="mr-2 h-4 w-4" />
-            <span>Loyalty</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />{" "}
