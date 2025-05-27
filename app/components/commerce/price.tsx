@@ -1,5 +1,5 @@
-
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
 
 export default function Price({
@@ -8,12 +8,14 @@ export default function Price({
   priceMax,
   unit,
   price,
+  className,
 }: {
   price?: number;
   currency?: string;
   priceMax?: number;
   unit?: string;
   promotion?: ShopperProductsTypes.ProductPromotion;
+  className?: string;
 }) {
   const formatPrice = (amount?: number) => {
     if (!amount) return null;
@@ -24,14 +26,14 @@ export default function Price({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-3">
         {promotion?.promotionalPrice ? (
           <>
             <span className="text-3xl font-bold text-red-600">
               {formatPrice(promotion.promotionalPrice)}
             </span>
-            <span className="text-xl text-muted-foreground line-through">
+            <span className="text-muted-foreground text-xl line-through">
               {formatPrice(price)}
             </span>
             <Badge variant="destructive">{promotion.calloutMsg}</Badge>
@@ -45,7 +47,7 @@ export default function Price({
         )}
       </div>
       {unit && (
-        <p className="text-sm text-muted-foreground">Price per {unit}</p>
+        <p className="text-muted-foreground text-sm">Price per {unit}</p>
       )}
     </div>
   );

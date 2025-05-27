@@ -17,6 +17,7 @@ import {
 import { getProductQueryOptions } from "@/integrations/salesforce/options/products";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
 import {
   ArrowLeft,
   Heart,
@@ -44,7 +45,7 @@ export const Route = createFileRoute("/products/$productId")({
 function RouteComponent() {
   const { productId } = Route.useParams();
 
-  const { data: product, isLoading } = useSuspenseQuery(
+  const { data: product, isLoading } = useSuspenseQuery<ShopperProductsTypes.Product>(
     getProductQueryOptions({ productId })
   );
   

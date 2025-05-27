@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
+import { Route as CheckoutImport } from './routes/checkout'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
@@ -23,6 +24,12 @@ import { Route as LayoutAccountImport } from './routes/_layout/account'
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CheckoutRoute = CheckoutImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -73,6 +80,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -120,6 +134,7 @@ const LayoutRouteWithChildren =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof LayoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
@@ -129,6 +144,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof LayoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
@@ -139,6 +155,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/_layout/account': typeof LayoutAccountRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
@@ -150,6 +167,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/checkout'
     | '/login'
     | '/account'
     | '/category/$categoryId'
@@ -158,6 +176,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | ''
+    | '/checkout'
     | '/login'
     | '/account'
     | '/category/$categoryId'
@@ -166,6 +185,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_layout'
+    | '/checkout'
     | '/login'
     | '/_layout/account'
     | '/category/$categoryId'
@@ -176,6 +196,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LayoutRoute: typeof LayoutRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
@@ -184,6 +205,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LayoutRoute: LayoutRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   CategoryCategoryIdRoute: CategoryCategoryIdRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
@@ -201,6 +223,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/_layout",
+        "/checkout",
         "/login",
         "/category/$categoryId",
         "/products/$productId"
@@ -214,6 +237,9 @@ export const routeTree = rootRoute
       "children": [
         "/_layout/account"
       ]
+    },
+    "/checkout": {
+      "filePath": "checkout.tsx"
     },
     "/login": {
       "filePath": "login.tsx"
