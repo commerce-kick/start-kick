@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
