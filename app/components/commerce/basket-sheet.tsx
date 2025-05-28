@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { getBasketQueryOptions } from "@/integrations/salesforce/options/basket";
 import { getProductsByIdsQueryOptions } from "@/integrations/salesforce/options/products";
@@ -101,9 +101,6 @@ export default function BasketSheet() {
               <div className="max-h-96 space-y-4 overflow-y-auto">
                 {enhancedItems.map((item, index) => {
                   const product = item.product;
-
-                  console.log(product);
-
                   const primaryImage =
                     product?.imageGroups?.find(
                       (group) => group.viewType === "large",

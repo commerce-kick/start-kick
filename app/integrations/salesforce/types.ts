@@ -18,6 +18,7 @@ export interface SalesforceSessionData {
   refreshToken?: string;
   tokenExpiry: number;
   customerId?: string;
+  usid?: string;
 }
 
 export interface ProductSearchParams {

@@ -1,4 +1,5 @@
 // hooks/use-salesforce-auth.ts
+import { useMergeBasketMutation } from "@/integrations/salesforce/options/basket";
 import {
   authenticateCustomer,
   logoutCustomer,
@@ -9,7 +10,7 @@ import { useRouter } from "@tanstack/react-router";
 
 export function useSalesforceAuth() {
   const queryClient = useQueryClient();
-
+  const mergeBasketMutation = useMergeBasketMutation();
   const router = useRouter();
 
   const loginMutation = useMutation({
@@ -20,8 +21,11 @@ export function useSalesforceAuth() {
       username: string;
       password: string;
     }) => authenticateCustomer({ data: { username, password } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await mergeBasketMutation.mutateAsync();
+
+      await queryClient.invalidateQueries();
+
       router.navigate({
         to: "/",
         replace: true,
@@ -38,7 +42,7 @@ export function useSalesforceAuth() {
         password: string;
       };
     }) => registerCustomer(formData),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries();
       router.navigate({
         to: "/",

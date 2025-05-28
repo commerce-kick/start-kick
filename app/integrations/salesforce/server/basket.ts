@@ -39,6 +39,19 @@ export const addItemToNewOrExistingBasket = createServerFn({ method: "POST" })
     });
   });
 
+export const mergeBasket = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.mergeBasket({
+      parameters: {
+        createDestinationBasket: true,
+      },
+    });
+  },
+);
+
 export const getBasket = createServerFn({ method: "GET" }).handler(async () => {
   const { api, client } = await getSalesforceAPI();
   const shopperBasket = await api.shopperBaskets();

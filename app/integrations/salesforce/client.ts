@@ -55,6 +55,7 @@ export class SalesforceCommerceClient {
       refreshToken: response.refresh_token,
       customerId: response.customer_id,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
+      usid: response.usid,
     });
   }
 
@@ -71,6 +72,7 @@ export class SalesforceCommerceClient {
       refreshToken: response.refresh_token,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
       customerId: response.customer_id,
+      usid: response.usid,
     });
   }
 
@@ -79,6 +81,7 @@ export class SalesforceCommerceClient {
     password: string,
   ): Promise<void> {
     await this.ensureAuthenticated();
+    const { usid } = await this.sessionManager.getTokens();
 
     const response = await helpers.loginRegisteredUserB2C(
       this.shopperLogin,
@@ -88,6 +91,7 @@ export class SalesforceCommerceClient {
       },
       {
         redirectURI: "http://localhost:3000/callback",
+        usid: usid,
       },
     );
 
@@ -96,22 +100,21 @@ export class SalesforceCommerceClient {
       refreshToken: response.refresh_token,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
       customerId: response.customer_id,
+      usid: response.usid,
     });
   }
 
   async logout(): Promise<void> {
-    const response = await helpers.loginGuestUser(
-      this.shopperLogin,
-      {
-        redirectURI: "http://localhost:3000/callback",
-      },
-    );
+    const response = await helpers.loginGuestUser(this.shopperLogin, {
+      redirectURI: "http://localhost:3000/callback",
+    });
 
     await this.sessionManager.saveTokens({
       accessToken: response.access_token,
       refreshToken: response.refresh_token,
       tokenExpiry: Date.now() + (response.expires_in - 300) * 1000,
       customerId: response.customer_id,
+      usid: response.usid,
     });
   }
 

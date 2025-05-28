@@ -1,3 +1,5 @@
+import { SalesforceSessionData } from "@/integrations/salesforce/types";
+
 export class SalesforceSessionManager {
   private session: any;
 
@@ -7,7 +9,7 @@ export class SalesforceSessionManager {
 
   async getTokens() {
     const data = await this.session.data;
-    return data || null;
+    return data || (null as SalesforceSessionData | null);
   }
 
   async saveTokens(tokenData: {
@@ -15,6 +17,7 @@ export class SalesforceSessionManager {
     customerId: string;
     refreshToken: string;
     tokenExpiry: number;
+    usid: string;
   }) {
     console.log(
       "Saving tokens - expires in:",
@@ -27,6 +30,7 @@ export class SalesforceSessionManager {
       refreshToken: tokenData.refreshToken,
       tokenExpiry: tokenData.tokenExpiry,
       customerId: tokenData.customerId,
+      usid: tokenData.usid,
     });
   }
 

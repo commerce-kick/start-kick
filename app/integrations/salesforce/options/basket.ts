@@ -1,6 +1,7 @@
 import {
-    addItemToNewOrExistingBasket,
-    getBasket,
+  addItemToNewOrExistingBasket,
+  getBasket,
+  mergeBasket,
 } from "@/integrations/salesforce/server/basket";
 import { AddItemToBasketParams } from "@/integrations/salesforce/types";
 import { queryOptions, useMutation } from "@tanstack/react-query";
@@ -14,6 +15,12 @@ export const useAddItemToBasketMutation = () => {
       errorMessage: "Something went worng",
       invalidateQuery: ["basket"],
     },
+  });
+};
+
+export const useMergeBasketMutation = () => {
+  return useMutation({
+    mutationFn: async () => mergeBasket(),
   });
 };
 
