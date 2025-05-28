@@ -80,7 +80,7 @@ export default function BasketSheet() {
         <SheetHeader>
           <SheetTitle>Shopping Cart ({itemCount} items)</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6 p-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
@@ -117,8 +117,7 @@ export default function BasketSheet() {
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-gray-50">
                         <img
                           src={
-                            primaryImage?.link ||
-                            item.image?.link ||
+                            primaryImage?.disBaseLink ||
                             "/placeholder.svg?height=80&width=80"
                           }
                           alt={product?.name || item.productName || "Product"}
@@ -149,20 +148,21 @@ export default function BasketSheet() {
                             <p className="text-sm text-gray-500">
                               Qty: {item.quantity}
                             </p>
-                            {item.variationValues &&
-                              Object.keys(item.variationValues).length > 0 && (
+                            {item.product?.variationValues &&
+                              Object.keys(item.product.variationValues).length >
+                                0 && (
                                 <div className="flex flex-wrap gap-1">
-                                  {Object.entries(item.variationValues).map(
-                                    ([key, value]) => (
-                                      <Badge
-                                        key={key}
-                                        variant="outline"
-                                        className="text-xs"
-                                      >
-                                        {key}: {value}
-                                      </Badge>
-                                    ),
-                                  )}
+                                  {Object.entries(
+                                    item.product.variationValues,
+                                  ).map(([key, value]) => (
+                                    <Badge
+                                      key={key}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {key}: {value}
+                                    </Badge>
+                                  ))}
                                 </div>
                               )}
                           </div>
@@ -170,15 +170,17 @@ export default function BasketSheet() {
                             <div className="text-sm font-medium text-gray-900">
                               {formatPrice(item.price, basket.currency)}
                             </div>
-                            {item.quantity > 1 && (
-                              <div className="text-xs text-gray-500">
-                                {formatPrice(
-                                  item.price / item.quantity,
-                                  basket.currency,
-                                )}{" "}
-                                each
-                              </div>
-                            )}
+                            {item.quantity &&
+                              item.price &&
+                              item.quantity > 1 && (
+                                <div className="text-xs text-gray-500">
+                                  {formatPrice(
+                                    item.price / item.quantity,
+                                    basket.currency,
+                                  )}{" "}
+                                  each
+                                </div>
+                              )}
                           </div>
                         </div>
 
@@ -260,10 +262,14 @@ export default function BasketSheet() {
                       ))}
                     </div>
                   )}
-                <div className="flex justify-between border-t pt-2 text-base font-medium">
-                  <span>Total</span>
-                  <span>{formatPrice(basket.orderTotal, basket.currency)}</span>
-                </div>
+                {basket.orderTotal && (
+                  <div className="flex justify-between border-t pt-2 text-base font-medium">
+                    <span>Total</span>
+                    <span>
+                      {formatPrice(basket.orderTotal, basket.currency)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
