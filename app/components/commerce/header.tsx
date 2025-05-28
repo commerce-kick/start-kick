@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
+import BasketSheet from "@/components/commerce/basket-sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -348,6 +349,7 @@ export function Header({
           <CommerceNavigation categories={categories} />
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
+          <BasketSheet />
           {!user?.authType ? (
             <Button asChild variant="ghost" size="sm" className="gap-2">
               <Link to="/login">

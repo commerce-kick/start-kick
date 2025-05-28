@@ -1,10 +1,21 @@
 import {
   getProduct,
   getProducts,
-  ProductSearchParams,
+  getProductsByIds,
 } from "@/integrations/salesforce/server/products";
+
+import type {
+  GetProductParams,
+  GetProductsByIdsParams,
+  ProductSearchParams,
+} from "@/integrations/salesforce/types";
+
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { ShopperSearchTypes } from "commerce-sdk-isomorphic";
+import {
+  ShopperProductsTypes,
+  ShopperSearchTypes,
+} from "commerce-sdk-isomorphic";
+
 export const getProductsQueryOptions = (params: ProductSearchParams) => {
   return queryOptions<ShopperSearchTypes.ProductSearchResult>({
     queryKey: ["products", "list", params],
@@ -12,11 +23,9 @@ export const getProductsQueryOptions = (params: ProductSearchParams) => {
   });
 };
 
-export const getInfinityProductsQueryOptions = (params: {
-  refine?: string[];
-  limit?: number;
-  offset?: number;
-}) => {
+export const getInfinityProductsQueryOptions = (
+  params: ProductSearchParams,
+) => {
   return infiniteQueryOptions({
     queryKey: ["products", "infinity", "list", params],
     queryFn: async ({ pageParam }) =>
@@ -31,11 +40,20 @@ export const getInfinityProductsQueryOptions = (params: {
   });
 };
 
-export const getProductQueryOptions = (params: any) => {
-  return queryOptions({
+export const getProductQueryOptions = (params: GetProductParams) => {
+  return queryOptions<ShopperProductsTypes.Product>({
     queryKey: ["product", params],
     queryFn: async () => {
       return getProduct({ data: params });
     },
+  });
+};
+
+export const getProductsByIdsQueryOptions = (
+  params: GetProductsByIdsParams,
+) => {
+  return queryOptions({
+    queryKey: ["products", params],
+    queryFn: async () => getProductsByIds({ data: params }),
   });
 };

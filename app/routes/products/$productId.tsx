@@ -3,10 +3,20 @@ import { ProductImageGallery } from "@/components/commerce/product-image-gallery
 import { ProductRecommendations } from "@/components/commerce/product-recommendations";
 import { ProductVariations } from "@/components/commerce/product-variations";
 import Rating from "@/components/commerce/rating";
+import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import LoadingIndicator from "@/components/ui/loading-indicator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -14,341 +24,879 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAddItemToBasketMutation } from "@/integrations/salesforce/options/basket";
 import { getProductQueryOptions } from "@/integrations/salesforce/options/products";
+import { cn } from "@/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ShopperBasketsTypes } from "commerce-sdk-isomorphic";
 import {
-  ArrowLeft,
+  AlertCircle,
+  CheckCircle,
   Heart,
-  Info,
   Minus,
   Plus,
-  Share2,
+  RotateCcw,
+  Shield,
+  ShoppingBag,
+  Star,
   Truck,
+  Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+
+interface ShareModalProps {
+  productName: string;
+  productUrl: string;
+}
+
+// Helper function to get default selections for variation attributes
+function getDefaultSelections(variationAttributes: any[], variants: any[]) {
+  const defaultSelections: Record<string, string> = {};
+
+  variationAttributes?.forEach((attr) => {
+    if (attr.values && attr.values.length > 0) {
+      // Filter orderable values
+      const orderableValues = attr.values.filter((value: any) => {
+        // Check if any variant with this value is orderable
+        return variants?.some(
+          (variant) =>
+            variant.variationValues?.[attr.id] === value.value &&
+            variant.orderable !== false,
+        );
+      });
+
+      // If only one orderable option, auto-select it
+      if (orderableValues.length === 1) {
+        defaultSelections[attr.id] = orderableValues[0].value;
+      }
+      // If multiple options, select the first orderable one as default
+      else if (orderableValues.length > 1) {
+        defaultSelections[attr.id] = orderableValues[0].value;
+      }
+    }
+  });
+
+  return defaultSelections;
+}
 
 export const Route = createFileRoute("/products/$productId")({
   component: RouteComponent,
-  loader: async ({ params, context }) => {
+  validateSearch: z.object({
+    pid: z.string().optional(),
+    variations: z.record(z.string()).optional(),
+  }),
+  loaderDeps: ({ search }) => ({ pid: search.pid }),
+  loader: async ({ params, context, deps }) => {
     const { queryClient } = context;
+
+    // Use pid from search params if available, otherwise use productId from params
+    const productId = deps.pid || params.productId;
 
     await queryClient.ensureQueryData(
       getProductQueryOptions({
-        productId: params.productId,
-      })
+        id: productId,
+        perPricebook: true,
+        expand: [
+          "availability",
+          "promotions",
+          "options",
+          "images",
+          "prices",
+          "variations",
+          "set_products",
+          "bundled_products",
+        ],
+        allImages: true,
+      }),
     );
   },
 });
 
-function RouteComponent() {
-  const { productId } = Route.useParams();
+function ProductSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8 md:px-6">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        {/* Image Skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="aspect-square w-full rounded-xl" />
+          <div className="flex gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square w-20 rounded-lg" />
+            ))}
+          </div>
+        </div>
 
-  const { data: product, isLoading } = useSuspenseQuery<ShopperProductsTypes.Product>(
-    getProductQueryOptions({ productId })
+        {/* Details Skeleton */}
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-10 w-1/3" />
+          </div>
+          <Separator />
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-1/4" />
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10" />
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Skeleton className="h-12 flex-1" />
+            <Skeleton className="h-12 w-12" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
-  
-  const { minOrderQuantity = 1, stepQuantity = 1 } = product;
+}
 
+type RouteComponentProps = {};
+
+function RouteComponent({}: RouteComponentProps) {
+  const { productId } = Route.useParams();
+  const { pid, variations: urlVariations } = Route.useSearch();
+  const navigate = useNavigate({ from: "/products/$productId" });
+
+  // Use pid if available, otherwise use productId
+  const actualProductId = pid || productId;
+
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useSuspenseQuery(
+    getProductQueryOptions({
+      id: actualProductId,
+      perPricebook: true,
+      expand: [
+        "availability",
+        "promotions",
+        "options",
+        "images",
+        "prices",
+        "variations",
+        "set_products",
+        "bundled_products",
+      ],
+      allImages: true,
+    }),
+  );
+
+  const addToBasketMutation = useAddItemToBasketMutation();
+
+  const { minOrderQuantity = 1, stepQuantity = 1 } = product;
   const [quantity, setQuantity] = useState(product.minOrderQuantity || 1);
   const [selectedVariations, setSelectedVariations] = useState<
     Record<string, string>
   >({});
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Initialize default selections
+  useEffect(() => {
+    if (product.variationAttributes && product.variants) {
+      const defaultSelections = getDefaultSelections(
+        product.variationAttributes,
+        product.variants,
+      );
+
+      // Merge URL variations with defaults (URL takes precedence)
+      const initialSelections = {
+        ...defaultSelections,
+        ...(urlVariations || {}),
+      };
+
+      setSelectedVariations(initialSelections);
+
+      // Find the variant for initial selections
+      const initialVariant = product.variants?.find((variant) => {
+        return Object.entries(initialSelections).every(([attrId, value]) => {
+          return variant.variationValues?.[attrId] === value;
+        });
+      });
+
+      // Update URL if we have default selections and no URL variations
+      if (Object.keys(initialSelections).length > 0 && !urlVariations) {
+        navigate({
+          search: (prev) => ({
+            ...prev,
+            variations: initialSelections,
+            pid: initialVariant?.productId || undefined,
+          }),
+          replace: true,
+        });
+      }
+    }
+  }, [product.variationAttributes, product.variants, urlVariations, navigate]);
+
+  // Find the selected variant
+  const selectedVariant = product.variants?.find((variant) => {
+    return Object.entries(selectedVariations).every(([attrId, value]) => {
+      return variant.variationValues?.[attrId] === value;
+    });
+  });
 
   const isInStock =
-    product.inventory?.orderable !== false &&
-    product.inventory?.stockLevel !== 0;
-  const stockLevel = product.inventory?.stockLevel;
+    selectedVariant?.orderable !== false &&
+    selectedVariant?.inventory?.stockLevel !== 0;
+  const stockLevel =
+    selectedVariant?.inventory?.stockLevel || product.inventory?.stockLevel;
   const promotion = product.productPromotions?.[0];
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  // Calculate stock status
+  const getStockStatus = () => {
+    if (!isInStock)
+      return { status: "out-of-stock", color: "red", text: "Out of Stock" };
+    if (stockLevel && stockLevel <= 5)
+      return {
+        status: "low-stock",
+        color: "orange",
+        text: `Only ${stockLevel} left`,
+      };
+    if (stockLevel && stockLevel <= 20)
+      return { status: "limited", color: "yellow", text: "Limited Stock" };
+    return { status: "in-stock", color: "green", text: "In Stock" };
+  };
+
+  const stockStatus = getStockStatus();
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(minOrderQuantity, quantity + delta);
     if (stepQuantity > 1) {
       const remainder = (newQuantity - minOrderQuantity) % stepQuantity;
       setQuantity(
-        remainder === 0 ? newQuantity : newQuantity - remainder + stepQuantity
+        remainder === 0 ? newQuantity : newQuantity - remainder + stepQuantity,
       );
     } else {
       setQuantity(newQuantity);
     }
   };
 
+  const handleVariationChange = (newVariations: Record<string, string>) => {
+    setSelectedVariations(newVariations);
+
+    // Find the selected variant based on new variations
+    const newSelectedVariant = product.variants?.find((variant) => {
+      return Object.entries(newVariations).every(([attrId, value]) => {
+        return variant.variationValues?.[attrId] === value;
+      });
+    });
+
+    // Update URL with new variations and PID if variant is selected
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        variations:
+          Object.keys(newVariations).length > 0 ? newVariations : undefined,
+        pid: newSelectedVariant?.productId || undefined,
+      }),
+      replace: true,
+    });
+  };
+
+  const handleAddToCart = async () => {
+    const productSelectionValues: ShopperBasketsTypes.ProductItem[] = [
+      {
+        productId: selectedVariant?.productId || product.id,
+        price: selectedVariant?.price || product.price,
+        quantity,
+      },
+    ];
+
+    try {
+      // Here you would call your addItemToNewOrExistingBasket function
+      console.log("Adding to cart:", productSelectionValues);
+      addToBasketMutation.mutate({
+        body: productSelectionValues,
+      });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const handleWishlistToggle = () => {
+    setIsWishlisted(!isWishlisted);
+  };
+
+  if (isLoading) {
+    return <ProductSkeleton />;
+  }
+
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      {/* Back button and breadcrumbs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-        <Button variant="ghost" size="sm" className="w-fit" asChild>
-          <Link to="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to shopping
-          </Link>
-        </Button>
+    <div className="bg-background min-h-screen">
+      {/* Breadcrumbs */}
+      <div className="bg-muted/30 border-b">
+        <div className="container mx-auto px-4 py-4 md:px-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Products</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{product.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Product Images */}
-
-        <div className="w-full rounded-xl overflow-hidden bg-muted/30 relative">
-          {isLoading && (
-            <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
-              <div className="bg-background p-4 rounded-lg shadow-lg flex items-center gap-2">
-                <LoadingIndicator />
-                <span>Updating product...</span>
-              </div>
-            </div>
-          )}
-          {product.imageGroups ? (
-            <ProductImageGallery imageGroups={product.imageGroups} />
-          ) : (
-            <div className="aspect-square bg-muted flex items-center justify-center">
-              <p className="text-muted-foreground">No image available</p>
-            </div>
-          )}
-        </div>
-
-        {/* Product Details */}
-        <div className="space-y-8">
+      <div className="container mx-auto px-4 py-8 md:px-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+          {/* Product Images with Variation Support */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Rating rating={4} />
-                <span className="text-sm text-muted-foreground">
-                  (24 reviews)
-                </span>
-              </div>
-              <div className="flex gap-4 items-center">
-                {isLoading && <LoadingIndicator />}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Share this product</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            <h1 className="text-3xl font-bold tracking-tight">
-              {product.productName}
-            </h1>
-
-            <Price
-              price={product.price}
-              currency={product.currency}
-              priceMax={product.priceMax}
-              unit={product.unit}
-              promotion={promotion}
-            />
-
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-muted-foreground">
-                Item No. {product.id}
-              </p>
-              {product.uuid && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <Info className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">UUID: {product.uuid}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+            <div className="relative">
+              {promotion && (
+                <Badge
+                  className="absolute top-4 left-4 z-10"
+                  variant="destructive"
+                >
+                  <Zap className="mr-1 h-3 w-3" />
+                  {promotion.calloutMsg || "Special Offer"}
+                </Badge>
               )}
+              <ProductImageGallery
+                imageGroups={product.imageGroups}
+                productName={product.name}
+                selectedVariationAttributes={selectedVariations}
+                lazy={false}
+              />
             </div>
           </div>
 
-          <Separator />
-
+          {/* Product Details */}
           <div className="space-y-6">
-            {product.variationAttributes &&
-              product.variationAttributes.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="font-medium">Options</h3>
-                  <ProductVariations
-                    variationAttributes={product.variationAttributes}
-                    onVariationChange={setSelectedVariations}
-                  />
-                </div>
-              )}
-
+            {/* Header */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Quantity</h3>
-                <div className="flex items-center gap-2">
-                  {isInStock ? (
-                    <>
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      <span className="text-sm text-green-600">In Stock</span>
-                      {stockLevel && stockLevel < 10 && (
-                        <span className="text-sm text-orange-600">
-                          ({stockLevel} left)
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-2 h-2 bg-red-500 rounded-full" />
-                      <span className="text-sm text-red-600">Out of Stock</span>
-                    </>
+              <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                  {product.brand && (
+                    <Badge variant="outline" className="w-fit">
+                      {product.brand}
+                    </Badge>
                   )}
+                  <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+                    {product.name}
+                  </h1>
+                </div>
+                <div className="flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isWishlisted ? "default" : "outline"}
+                          size="icon"
+                          onClick={handleWishlistToggle}
+                        >
+                          <Heart
+                            className={cn(
+                              "h-4 w-4",
+                              isWishlisted && "fill-current",
+                            )}
+                          />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isWishlisted
+                          ? "Remove from wishlist"
+                          : "Add to wishlist"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 
-              {/* Quantity and Add to Cart */}
+              {/* Rating and Reviews */}
               <div className="flex items-center gap-4">
-                <div className="flex items-center border rounded-md">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleQuantityChange(-stepQuantity)}
-                    disabled={quantity <= minOrderQuantity}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="px-4 py-2 min-w-[60px] text-center">
-                    {quantity}
+                <div className="flex items-center gap-2">
+                  <Rating rating={product.averageRating || 0} />
+                  <span className="text-muted-foreground text-sm">
+                    ({product.reviews?.length || 0}{" "}
+                    {product.reviews?.length === 1 ? "review" : "reviews"})
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleQuantityChange(stepQuantity)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
                 </div>
-                {minOrderQuantity > 1 && (
-                  <span className="text-sm text-muted-foreground">
-                    Min. order: {minOrderQuantity}
-                  </span>
+                <Separator orientation="vertical" className="h-4" />
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-sm">SKU:</span>
+                  <code className="bg-muted rounded px-2 py-1 text-sm">
+                    {selectedVariant?.productId || product.id}
+                  </code>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="space-y-2">
+                <Price
+                  price={selectedVariant?.price || product.price}
+                  currency={product.currency}
+                  priceMax={product.priceMax}
+                  unit={product.unit}
+                  promotion={promotion}
+                  className="text-2xl"
+                />
+                {promotion && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="destructive" className="text-xs">
+                      Save{" "}
+                      {promotion.promotionalPrice &&
+                      (selectedVariant?.price || product.price)
+                        ? Math.round(
+                            (((selectedVariant?.price || product.price) -
+                              promotion.promotionalPrice) /
+                              (selectedVariant?.price || product.price)) *
+                              100,
+                          )
+                        : 0}
+                      %
+                    </Badge>
+                    <span className="text-muted-foreground text-sm">
+                      Limited time offer
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="flex sm:flex-row gap-3">
-              <Button size="lg" className="flex-1" onClick={() => {}}>
-                {/* {addToCart.isPending ? (
-                  <LoadingIndicator />
-                ) : (
-                  <ShoppingBag className="mr-2 h-5 w-5" />
-                )} */}
-                <span className="ml-2">Add to Cart</span>
-              </Button>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="lg" className="flex-none">
-                      <Heart className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Add to wishlist</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <Separator />
 
-            <div className="bg-muted/30 rounded-lg p-4 flex items-center gap-3">
-              <Truck className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Free shipping</p>
-                <p className="text-xs text-muted-foreground">
-                  Delivery in 2-4 business days
-                </p>
-              </div>
-            </div>
-
-            {product.shortDescription && (
-              <div className="text-sm text-muted-foreground">
-                <p>{product.shortDescription}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Product Information Tabs */}
-      <div className="mt-12">
-        <Tabs defaultValue="description" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="specifications">Specifications</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          </TabsList>
-          <TabsContent value="description" className="mt-6">
-            <Card>
-              <CardContent>
-                <div className="prose dark:prose-invert max-w-none">
-                  {product.longDescription ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: product.longDescription,
-                      }}
+            {/* Product Options */}
+            <div className="space-y-6">
+              {/* Variations */}
+              {product.variationAttributes &&
+                product.variationAttributes.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Options</h3>
+                    <ProductVariations
+                      variationAttributes={product.variationAttributes}
+                      variants={product.variants}
+                      selectedVariations={selectedVariations}
+                      onVariationChange={handleVariationChange}
                     />
-                  ) : (
-                    <p className="text-muted-foreground">
-                      No description available
-                    </p>
+                  </div>
+                )}
+
+              {/* Quantity Selector */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <h3 className="font-semibold">Quantity</h3>
+                    {minOrderQuantity > 1 && (
+                      <span className="text-muted-foreground text-sm">
+                        Min. order: {minOrderQuantity}
+                      </span>
+                    )}
+                  </div>
+                  <Badge
+                    className={cn(
+                      stockStatus.color === "green" &&
+                        "border-green-200 bg-green-50",
+                      stockStatus.color === "orange" &&
+                        "border-orange-200 bg-orange-50",
+                      stockStatus.color === "red" && "border-red-200 bg-red-50",
+                    )}
+                  >
+                    {stockStatus.color === "green" && (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    )}
+                    {stockStatus.color === "orange" && (
+                      <AlertCircle className="h-4 w-4 text-orange-600" />
+                    )}
+                    {stockStatus.color === "red" && (
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    )}
+                    <span
+                      className={cn(
+                        stockStatus.color === "green" && "text-green-800",
+                        stockStatus.color === "orange" && "text-orange-800",
+                        stockStatus.color === "red" && "text-red-800",
+                      )}
+                    >
+                      {stockStatus.text}
+                    </span>
+                  </Badge>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center rounded-lg border">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleQuantityChange(-stepQuantity)}
+                      disabled={quantity <= minOrderQuantity}
+                      className="h-10 w-10"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="min-w-[60px] px-4 py-2 text-center font-medium">
+                      {quantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleQuantityChange(stepQuantity)}
+                      disabled={!isInStock}
+                      className="h-10 w-10"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {stepQuantity > 1 && (
+                    <span className="text-muted-foreground text-sm">
+                      Step: {stepQuantity}
+                    </span>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="specifications" className="mt-6">
-            <Card>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Material</p>
-                    <p className="text-sm text-muted-foreground">
-                      Premium cotton blend
-                    </p>
+              </div>
+
+              {/* Add to Cart */}
+              <div className="space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={handleAddToCart}
+                  disabled={!isInStock}
+                >
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                  {isInStock ? "Add to Cart" : "Out of Stock"}
+                </Button>
+
+                {/* Product Features */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="bg-muted/30 flex items-center gap-2 rounded-lg p-3">
+                    <Truck className="text-muted-foreground h-4 w-4" />
+                    <div>
+                      <p className="text-xs font-medium">Free Shipping</p>
+                      <p className="text-muted-foreground text-xs">2-4 days</p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Weight</p>
-                    <p className="text-sm text-muted-foreground">0.5 kg</p>
+                  <div className="bg-muted/30 flex items-center gap-2 rounded-lg p-3">
+                    <RotateCcw className="text-muted-foreground h-4 w-4" />
+                    <div>
+                      <p className="text-xs font-medium">Easy Returns</p>
+                      <p className="text-muted-foreground text-xs">30 days</p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Dimensions</p>
-                    <p className="text-sm text-muted-foreground">
-                      10 × 5 × 2 cm
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Care Instructions</p>
-                    <p className="text-sm text-muted-foreground">
-                      Machine wash cold
-                    </p>
+                  <div className="bg-muted/30 flex items-center gap-2 rounded-lg p-3">
+                    <Shield className="text-muted-foreground h-4 w-4" />
+                    <div>
+                      <p className="text-xs font-medium">Warranty</p>
+                      <p className="text-muted-foreground text-xs">2 years</p>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent>
-                <p className="text-center text-muted-foreground py-8">
-                  No reviews yet
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+              </div>
 
-      <ProductRecommendations
-        recommendations={product.recommendations}
-        currency={product.currency}
-      />
+              {/* Short Description */}
+              {product.shortDescription && (
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="text-muted-foreground text-sm">
+                    {product.shortDescription}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Product Information Tabs */}
+        <div className="mt-16">
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="specifications">Specifications</TabsTrigger>
+              <TabsTrigger value="reviews">
+                Reviews{" "}
+                {product.reviews?.length ? `(${product.reviews.length})` : ""}
+              </TabsTrigger>
+              <TabsTrigger value="shipping">Shipping</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="description" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="prose dark:prose-invert max-w-none">
+                    {product.longDescription ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: product.longDescription,
+                        }}
+                      />
+                    ) : (
+                      <p className="text-muted-foreground">
+                        No detailed description available for this product.
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="specifications" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {product.manufacturerName && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Manufacturer</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.manufacturerName}
+                        </p>
+                      </div>
+                    )}
+                    {product.manufacturerSku && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Manufacturer SKU</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.manufacturerSku}
+                        </p>
+                      </div>
+                    )}
+                    {product.upc && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">UPC</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.upc}
+                        </p>
+                      </div>
+                    )}
+                    {product.ean && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">EAN</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.ean}
+                        </p>
+                      </div>
+                    )}
+                    {product.unit && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Unit</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.unit}
+                        </p>
+                      </div>
+                    )}
+                    {product.stepQuantity && product.stepQuantity > 1 && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Step Quantity</p>
+                        <p className="text-muted-foreground text-sm">
+                          {product.stepQuantity}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="reviews" className="mt-6">
+              <div className="space-y-6">
+                {/* Review Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Customer Reviews</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {product.reviews && product.reviews.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <div className="text-4xl font-bold">
+                              {product.averageRating || "N/A"}
+                            </div>
+                            <div>
+                              <Rating rating={product.averageRating || 0} />
+                              <p className="text-muted-foreground text-sm">
+                                Based on {product.reviews.length}{" "}
+                                {product.reviews.length === 1
+                                  ? "review"
+                                  : "reviews"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {[5, 4, 3, 2, 1].map((stars) => {
+                            const count =
+                              product.reviews?.filter(
+                                (review) => Math.floor(review.rating) === stars,
+                              ).length || 0;
+                            const percentage = product.reviews?.length
+                              ? (count / product.reviews.length) * 100
+                              : 0;
+                            return (
+                              <div
+                                key={stars}
+                                className="flex items-center gap-2"
+                              >
+                                <span className="w-8 text-sm">{stars}</span>
+                                <Star className="h-3 w-3 fill-current" />
+                                <Progress
+                                  value={percentage}
+                                  className="flex-1"
+                                />
+                                <span className="text-muted-foreground w-8 text-sm">
+                                  {count}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <p className="text-muted-foreground">
+                          No reviews available for this product yet.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                          Be the first to leave a review!
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Individual Reviews */}
+                {product.reviews && product.reviews.length > 0 && (
+                  <div className="space-y-4">
+                    {product.reviews.slice(0, 5).map((review, i) => (
+                      <Card key={review.id || i}>
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <Rating rating={review.rating} />
+                                  <span className="font-medium">
+                                    {review.customerName || "Anonymous"}
+                                  </span>
+                                </div>
+                                <p className="text-muted-foreground text-sm">
+                                  {review.verified && "Verified Purchase • "}
+                                  {review.createdAt
+                                    ? new Date(
+                                        review.createdAt,
+                                      ).toLocaleDateString()
+                                    : "Recent"}
+                                </p>
+                              </div>
+                              {review.verified && (
+                                <Badge variant="outline">Verified</Badge>
+                              )}
+                            </div>
+                            <div>
+                              {review.title && (
+                                <h4 className="mb-2 font-medium">
+                                  {review.title}
+                                </h4>
+                              )}
+                              <p className="text-muted-foreground text-sm">
+                                {review.comment}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {product.reviews.length > 5 && (
+                      <div className="text-center">
+                        <Button variant="outline">
+                          View all {product.reviews.length} reviews
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="shipping" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Shipping Options</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between rounded-lg border p-3">
+                            <div className="flex items-center gap-3">
+                              <Truck className="text-muted-foreground h-5 w-5" />
+                              <div>
+                                <p className="font-medium">Standard Shipping</p>
+                                <p className="text-muted-foreground text-sm">
+                                  5-7 business days
+                                </p>
+                              </div>
+                            </div>
+                            <span className="font-medium">Free</span>
+                          </div>
+                          <div className="flex items-center justify-between rounded-lg border p-3">
+                            <div className="flex items-center gap-3">
+                              <Zap className="text-muted-foreground h-5 w-5" />
+                              <div>
+                                <p className="font-medium">Express Shipping</p>
+                                <p className="text-muted-foreground text-sm">
+                                  2-3 business days
+                                </p>
+                              </div>
+                            </div>
+                            <span className="font-medium">$9.99</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <h3 className="font-semibold">Return Policy</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <RotateCcw className="text-muted-foreground mt-0.5 h-5 w-5" />
+                            <div>
+                              <p className="font-medium">30-Day Returns</p>
+                              <p className="text-muted-foreground text-sm">
+                                Free returns within 30 days of purchase
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <Shield className="text-muted-foreground mt-0.5 h-5 w-5" />
+                            <div>
+                              <p className="font-medium">Warranty</p>
+                              <p className="text-muted-foreground text-sm">
+                                2-year manufacturer warranty included
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Recommendations */}
+        {product.recommendations && (
+          <div className="mt-16">
+            <ProductRecommendations
+              recommendations={product.recommendations}
+              currency={product.currency}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

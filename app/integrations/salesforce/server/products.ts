@@ -1,20 +1,10 @@
 import { getSalesforceAPI } from "@/integrations/salesforce/server/config";
+import {
+  GetProductParams,
+  GetProductsByIdsParams,
+  ProductSearchParams,
+} from "@/integrations/salesforce/types";
 import { createServerFn } from "@tanstack/react-start";
-
-export interface ProductSearchParams {
-  select?: string;
-  q?: string;
-  refine?: Array<string>;
-  sort?: string;
-  currency?: string;
-  locale?: string;
-  expand?: Array<string>;
-  allImages?: boolean;
-  perPricebook?: boolean;
-  allVariationProperties?: boolean;
-  offset?: any;
-  limit?: number;
-}
 
 export const getProducts = createServerFn({ method: "GET" })
   .validator((data: ProductSearchParams) => data)
@@ -27,15 +17,45 @@ export const getProducts = createServerFn({ method: "GET" })
   });
 
 export const getProduct = createServerFn({ method: "GET" })
-  .validator((data: { productId: string; expand?: string[] }) => data)
+  .validator((data: GetProductParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
     return await shopperProducts.getProduct({
       parameters: {
-        id: data.productId,
+        id: data.id,
         allImages: true,
-        expand: data.expand || ["prices", "images", "variations"],
+        expand: data.expand || [
+          "availability",
+          "promotions",
+          "options",
+          "images",
+          "prices",
+          "variations",
+          "set_products",
+          "bundled_products",
+        ],
+      },
+    });
+  });
+
+export const getProductsByIds = createServerFn({ method: "GET" })
+  .validator((data: GetProductsByIdsParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperProducts = await api.shopperProducts();
+    return await shopperProducts.getProducts({
+      parameters: {
+        ids: data.ids,
+        allImages: true,
+        expand: data.expand || [
+          "availability",
+          "promotions",
+          "options",
+          "images",
+          "prices",
+          "variations",
+        ],
       },
     });
   });

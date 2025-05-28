@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
+import { Toaster } from "@/components/ui/sonner";
 import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
 import appCss from "@/styles/app.css?url";
@@ -74,7 +75,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <div className="flex min-h-screen flex-col">{children}</div>
 
         <Footer />
-
+        <Toaster />
         <Scripts />
       </body>
     </html>
