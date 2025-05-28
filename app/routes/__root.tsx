@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { Analytics } from "@vercel/analytics/next";
+
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
 import { Toaster } from "@/components/ui/sonner";
@@ -75,6 +77,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <div className="flex min-h-screen flex-col">{children}</div>
 
         <Footer />
+
+        <Analytics />
+
         <Toaster />
         <Scripts />
       </body>
