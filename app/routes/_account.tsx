@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_layout")({
+export const Route = createFileRoute("/_account")({
   component: RouteComponent,
 });
 
@@ -12,6 +12,10 @@ function RouteComponent() {
         <div className="grid grid-flow-row auto-rows-max gap-0.5 text-sm">
           <Button variant="ghost" asChild className="justify-start">
             <Link to="/account">Account Info</Link>
+          </Button>
+
+          <Button variant="ghost" asChild className="justify-start">
+            <Link to="/wishlist">Wislist</Link>
           </Button>
         </div>
       </aside>

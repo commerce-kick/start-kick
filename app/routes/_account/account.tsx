@@ -92,7 +92,7 @@ const customerSchema = z.object({
 
 type CustomerFormData = z.infer<typeof customerSchema>;
 
-export const Route = createFileRoute("/_layout/account")({
+export const Route = createFileRoute("/_account/account")({
   component: RouteComponent,
   loader: async ({ context }) => {
     const { queryClient } = context;

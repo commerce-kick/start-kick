@@ -13,11 +13,12 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as CheckoutImport } from './routes/checkout'
-import { Route as LayoutImport } from './routes/_layout'
+import { Route as AccountImport } from './routes/_account'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as CategoryCategoryIdImport } from './routes/category/$categoryId'
-import { Route as LayoutAccountImport } from './routes/_layout/account'
+import { Route as AccountWishlistImport } from './routes/_account/wishlist'
+import { Route as AccountAccountImport } from './routes/_account/account'
 
 // Create/Update Routes
 
@@ -33,8 +34,8 @@ const CheckoutRoute = CheckoutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutRoute = LayoutImport.update({
-  id: '/_layout',
+const AccountRoute = AccountImport.update({
+  id: '/_account',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -56,10 +57,16 @@ const CategoryCategoryIdRoute = CategoryCategoryIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutAccountRoute = LayoutAccountImport.update({
+const AccountWishlistRoute = AccountWishlistImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AccountRoute,
+} as any)
+
+const AccountAccountRoute = AccountAccountImport.update({
   id: '/account',
   path: '/account',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AccountRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -73,11 +80,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/_layout': {
-      id: '/_layout'
+    '/_account': {
+      id: '/_account'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof LayoutImport
+      preLoaderRoute: typeof AccountImport
       parentRoute: typeof rootRoute
     }
     '/checkout': {
@@ -94,12 +101,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/account': {
-      id: '/_layout/account'
+    '/_account/account': {
+      id: '/_account/account'
       path: '/account'
       fullPath: '/account'
-      preLoaderRoute: typeof LayoutAccountImport
-      parentRoute: typeof LayoutImport
+      preLoaderRoute: typeof AccountAccountImport
+      parentRoute: typeof AccountImport
+    }
+    '/_account/wishlist': {
+      id: '/_account/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AccountWishlistImport
+      parentRoute: typeof AccountImport
     }
     '/category/$categoryId': {
       id: '/category/$categoryId'
@@ -120,33 +134,37 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-interface LayoutRouteChildren {
-  LayoutAccountRoute: typeof LayoutAccountRoute
+interface AccountRouteChildren {
+  AccountAccountRoute: typeof AccountAccountRoute
+  AccountWishlistRoute: typeof AccountWishlistRoute
 }
 
-const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutAccountRoute: LayoutAccountRoute,
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountAccountRoute: AccountAccountRoute,
+  AccountWishlistRoute: AccountWishlistRoute,
 }
 
-const LayoutRouteWithChildren =
-  LayoutRoute._addFileChildren(LayoutRouteChildren)
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '': typeof LayoutRouteWithChildren
+  '': typeof AccountRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
-  '/account': typeof LayoutAccountRoute
+  '/account': typeof AccountAccountRoute
+  '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '': typeof LayoutRouteWithChildren
+  '': typeof AccountRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
-  '/account': typeof LayoutAccountRoute
+  '/account': typeof AccountAccountRoute
+  '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
@@ -154,10 +172,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/_layout': typeof LayoutRouteWithChildren
+  '/_account': typeof AccountRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
-  '/_layout/account': typeof LayoutAccountRoute
+  '/_account/account': typeof AccountAccountRoute
+  '/_account/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
@@ -170,6 +189,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/account'
+    | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
@@ -179,15 +199,17 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/account'
+    | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
   id:
     | '__root__'
     | '/'
-    | '/_layout'
+    | '/_account'
     | '/checkout'
     | '/login'
-    | '/_layout/account'
+    | '/_account/account'
+    | '/_account/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
   fileRoutesById: FileRoutesById
@@ -195,7 +217,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LayoutRoute: typeof LayoutRouteWithChildren
+  AccountRoute: typeof AccountRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
@@ -204,7 +226,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LayoutRoute: LayoutRouteWithChildren,
+  AccountRoute: AccountRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   CategoryCategoryIdRoute: CategoryCategoryIdRoute,
@@ -222,7 +244,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_layout",
+        "/_account",
         "/checkout",
         "/login",
         "/category/$categoryId",
@@ -232,10 +254,11 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.tsx"
     },
-    "/_layout": {
-      "filePath": "_layout.tsx",
+    "/_account": {
+      "filePath": "_account.tsx",
       "children": [
-        "/_layout/account"
+        "/_account/account",
+        "/_account/wishlist"
       ]
     },
     "/checkout": {
@@ -244,9 +267,13 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
-    "/_layout/account": {
-      "filePath": "_layout/account.tsx",
-      "parent": "/_layout"
+    "/_account/account": {
+      "filePath": "_account/account.tsx",
+      "parent": "/_account"
+    },
+    "/_account/wishlist": {
+      "filePath": "_account/wishlist.tsx",
+      "parent": "/_account"
     },
     "/category/$categoryId": {
       "filePath": "category/$categoryId.tsx"

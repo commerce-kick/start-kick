@@ -1,4 +1,5 @@
 import { SalesforceCommerceClient } from "@/integrations/salesforce/client";
+import { ProductListTypes } from "@/integrations/salesforce/enums";
 import {
   getSalesforceAPI,
   salesforceConfig,
@@ -65,3 +66,59 @@ export const getCustomer = createServerFn({ method: "GET" }).handler(
     });
   },
 );
+
+export const customerProductLists = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { data } = await useAppSession();
+    const { api } = await getSalesforceAPI();
+
+    const shopperCustomers = await api.shopperCustomers();
+
+    return await shopperCustomers.getCustomerProductLists({
+      parameters: {
+        customerId: data.customerId,
+      },
+    });
+  },
+);
+
+export const createProductList = createServerFn({ method: "POST" })
+  .validator((data: { type: ProductListTypes }) => data)
+  .handler(async ({ data }) => {
+    const { data: sessionData } = await useAppSession();
+    const { api } = await getSalesforceAPI();
+
+    const shopperCustomers = await api.shopperCustomers();
+
+    return shopperCustomers.createCustomerProductList({
+      body: {
+        type: data.type,
+      },
+      parameters: {
+        customerId: sessionData.customerId,
+      },
+    });
+  });
+
+export const addItemToProductList = createServerFn({ method: "POST" })
+  .validator((data: { listId: string; productId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const { data: sessionData } = await useAppSession();
+
+    const shopperCustomers = await api.shopperCustomers();
+
+    return await shopperCustomers.createCustomerProductListItem({
+      parameters: {
+        customerId: sessionData.customerId,
+        listId: data.listId,
+      },
+      body: {
+        quantity: 1,
+        productId: data.productId,
+        public: false,
+        priority: 1,
+        type: "product",
+      },
+    });
+  });

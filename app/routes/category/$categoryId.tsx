@@ -39,6 +39,8 @@ import { Filter, Grid3X3, List, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWishList } from "@/hooks/use-wishlist";
+import { useAddItemToProductListMutation } from "@/integrations/salesforce/options/customer";
 import { cn } from "@/lib/utils";
 import type { ShopperSearchTypes } from "commerce-sdk-isomorphic";
 import { z } from "zod";
@@ -61,7 +63,7 @@ export const Route = createFileRoute("/category/$categoryId")({
         limit: 12,
       }),
     );
-  }
+  },
 });
 
 const FiltersContent = ({
@@ -431,11 +433,14 @@ function RouteComponent() {
     sort,
     refinements = {},
   } = useSearch({ from: "/category/$categoryId" });
+
   const { categoryId } = Route.useParams();
   const navigate = useNavigate({ from: "/category/$categoryId" });
 
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const { wishList } = useWishList();
+  const addToWishListMutation = useAddItemToProductListMutation();
 
   // Build refine array for API
   const refineArray = [`cgid=${categoryId}`];
@@ -496,6 +501,17 @@ function RouteComponent() {
         refinements: undefined,
         offset: 0,
       }),
+    });
+  };
+
+  const handleAddToWishList = (productId: string) => {
+    if (!wishList?.id) {
+      return;
+    }
+
+    addToWishListMutation.mutate({
+      listId: wishList?.id,
+      productId: productId,
     });
   };
 
@@ -671,6 +687,12 @@ function RouteComponent() {
                     product={product}
                     key={product.productId}
                     viewMode={viewMode}
+                    onWishListToggle={() =>
+                      handleAddToWishList(product.productId)
+                    }
+                    isFavorite={wishList?.customerProductListItems?.some(
+                      (p) => p.productId === product.productId,
+                    )}
                   />
                 ))}
               </div>

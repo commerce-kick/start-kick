@@ -18,6 +18,11 @@ declare module "@tanstack/react-query" {
 
 export function createRouter() {
   const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
     mutationCache: new MutationCache({
       onSuccess: (_data, _variables, _context, mutation) => {
         if (mutation.meta?.sucessMessage) {

@@ -33,6 +33,8 @@ import { useState } from "react";
 interface ProductCardProps {
   product: ShopperSearchTypes.ProductSearchHit;
   viewMode?: "grid" | "list";
+  onWishListToggle?: () => void;
+  isFavorite?: boolean;
 }
 
 export default function SearchHit({
@@ -47,11 +49,12 @@ export default function SearchHit({
     productPromotions,
     imageGroups,
     priceRanges,
-    representedProduct,
   },
   viewMode = "grid",
+  onWishListToggle,
+  isFavorite,
 }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(isFavorite ?? false);
   const [imageError, setImageError] = useState(false);
 
   // Get the primary image with fallback
@@ -95,6 +98,9 @@ export default function SearchHit({
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    onWishListToggle?.();
+
     setIsWishlisted(!isWishlisted);
   };
 
