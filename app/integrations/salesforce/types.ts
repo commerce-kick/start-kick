@@ -61,3 +61,40 @@ export interface GetProductsByIdsParams {
 export interface AddItemToBasketParams {
   body: Array<ShopperBasketsTypes.ProductItem>;
 }
+export interface UpdateShippingAddressForShipmentParams {
+  params: {
+    basketId: string;
+    shipmentId: string;
+    useAsBilling?: boolean;
+    removeExternalTax?: boolean;
+  };
+  body: ShopperBasketsTypes.OrderAddress;
+}
+
+export interface UpdateShippingMethodParams {
+  params: {
+    basketId: string;
+    shipmentId: string;
+  };
+  body: ShopperBasketsTypes.Shipment;
+}
+
+export interface UpdateShippingMethodForShipmentParams {
+  params: {
+    basketId: string;
+    shipmentId: string;
+  };
+  body: ShopperBasketsTypes.ShippingMethod;
+}
+
+export interface AddPaymentInstrumentToBasketParams {
+  params: {
+    basketId: string;
+  };
+  body: ShopperBasketsTypes.OrderPaymentInstrument;
+}
+
+export interface CreateOrderParams {
+  params?: {};
+  body: ShopperBasketsTypes.Basket;
+}

@@ -274,8 +274,14 @@ export default function BasketSheet() {
 
               {/* Action Buttons */}
               <div className="space-y-2">
-                <Button className="w-full" asChild>
-                  <Link to="/">Proceed to Checkout</Link>
+                <Button
+                  className="w-full"
+                  asChild
+                  onClick={() => {
+                    setOpen(false);
+                  }}
+                >
+                  <Link to="/checkout">Proceed to Checkout</Link>
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <Link to="/">View Cart</Link>

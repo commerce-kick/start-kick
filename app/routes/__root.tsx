@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { Analytics } from "@vercel/analytics/react";
 
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
@@ -78,7 +77,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
         <Footer />
 
-        <Analytics />
+        {/* <Analytics /> */}
 
         <Toaster />
         <Scripts />

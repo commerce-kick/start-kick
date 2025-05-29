@@ -1,5 +1,10 @@
 import { getSalesforceAPI } from "@/integrations/salesforce/server/config";
-import { AddItemToBasketParams } from "@/integrations/salesforce/types";
+import {
+  AddItemToBasketParams,
+  AddPaymentInstrumentToBasketParams,
+  UpdateShippingAddressForShipmentParams,
+  UpdateShippingMethodParams,
+} from "@/integrations/salesforce/types";
 import { createServerFn } from "@tanstack/react-start";
 
 export const addItemToNewOrExistingBasket = createServerFn({ method: "POST" })
@@ -52,6 +57,35 @@ export const mergeBasket = createServerFn({ method: "POST" }).handler(
   },
 );
 
+export const updateCustomerForBasket = createServerFn({ method: "POST" })
+  .validator((data: { email: string; basketId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.updateCustomerForBasket({
+      parameters: {
+        basketId: data.basketId,
+      },
+      body: {
+        email: data.email,
+      },
+    });
+  });
+
+export const deleteBasket = createServerFn({ method: "POST" })
+  .validator((data: { basketId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.deleteBasket({
+      parameters: {
+        basketId: data.basketId,
+      },
+    });
+  });
+
 export const getBasket = createServerFn({ method: "GET" }).handler(async () => {
   const { api, client } = await getSalesforceAPI();
   const shopperBasket = await api.shopperBaskets();
@@ -85,3 +119,69 @@ export const getBasket = createServerFn({ method: "GET" }).handler(async () => {
     },
   });
 });
+
+export const updateShippingMethod = createServerFn({ method: "POST" })
+  .validator((data: UpdateShippingMethodParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.updateShipmentForBasket({
+      body: data.body,
+      parameters: data.params,
+    });
+  });
+
+export const updateShippingMethodForShipment = createServerFn({
+  method: "POST",
+})
+  .validator((data: UpdateShippingMethodParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.updateShippingMethodForShipment({
+      parameters: data.params,
+      body: data.body,
+    });
+  });
+
+export const updateShippingAddressForShipment = createServerFn({
+  method: "POST",
+})
+  .validator((data: UpdateShippingAddressForShipmentParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.updateShippingAddressForShipment({
+      parameters: data.params,
+      body: data.body,
+    });
+  });
+
+export const getShippingMethodsForShipment = createServerFn({ method: "GET" })
+  .validator((data: { basketId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.getShippingMethodsForShipment({
+      parameters: {
+        basketId: data.basketId,
+        shipmentId: "me",
+      },
+    });
+  });
+
+export const addPaymentInstrumentToBasket = createServerFn({ method: "POST" })
+  .validator((data: AddPaymentInstrumentToBasketParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.addPaymentInstrumentToBasket({
+      body: data.body,
+      parameters: data.params,
+    });
+  });
