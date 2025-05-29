@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-
 import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +13,8 @@ import { getCustomerQueryOptions } from "@/integrations/salesforce/options/custo
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
 import appCss from "@/styles/app.css?url";
 import { QueryClient, useSuspenseQueries } from "@tanstack/react-query";
+
+import { Analytics } from "@vercel/analytics/react";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -77,7 +78,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
         <Footer />
 
-        {/* <Analytics /> */}
+        <Analytics />
 
         <Toaster />
         <Scripts />
