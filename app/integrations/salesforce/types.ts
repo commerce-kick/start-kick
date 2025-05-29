@@ -36,6 +36,15 @@ export interface ProductSearchParams {
   limit?: number;
 }
 
+export interface CustomerOrdersParams {
+  crossSites?: boolean;
+  from?: string;
+  until?: string;
+  status?: string;
+  offset?: any;
+  limit?: number;
+}
+
 export interface GetProductParams {
   id: string;
   select?: string;

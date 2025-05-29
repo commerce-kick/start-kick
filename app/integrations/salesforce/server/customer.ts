@@ -4,8 +4,12 @@ import {
   getSalesforceAPI,
   salesforceConfig,
 } from "@/integrations/salesforce/server/config";
+import {
+  CustomerOrdersParams
+} from "@/integrations/salesforce/types";
 import { useAppSession } from "@/utils/session";
 import { createServerFn } from "@tanstack/react-start";
+import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 
 export const authenticateCustomer = createServerFn({ method: "POST" })
   .validator((data: { username: string; password: string }) => data)
@@ -121,4 +125,19 @@ export const addItemToProductList = createServerFn({ method: "POST" })
         type: "product",
       },
     });
+  });
+
+export const getCustomerOrders = createServerFn({ method: "GET" })
+  .validator((data: CustomerOrdersParams) => data)
+  .handler(async ({ data }) => {
+    const { api, client } = await getSalesforceAPI();
+    const shopperCustomers = await api.shopperCustomers();
+    const customerId = await client.getCustomerId();
+
+    return (await shopperCustomers.getCustomerOrders({
+      parameters: {
+        customerId,
+        ...data,
+      },
+    })) as ShopperCustomersTypes.CustomerOrderResult;
   });

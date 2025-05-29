@@ -4,7 +4,9 @@ import {
   createProductList,
   customerProductLists,
   getCustomer,
+  getCustomerOrders,
 } from "@/integrations/salesforce/server/customer";
+import { CustomerOrdersParams } from "@/integrations/salesforce/types";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 
@@ -12,6 +14,13 @@ export const getCustomerQueryOptions = () => {
   return queryOptions<ShopperCustomersTypes.Customer>({
     queryKey: ["customers"],
     queryFn: async () => getCustomer(),
+  });
+};
+
+export const getCustomerOrdersQueryOptions = (data: CustomerOrdersParams) => {
+  return queryOptions({
+    queryKey: ["customers", "orders", { ...data }],
+    queryFn: async () => getCustomerOrders({ data }),
   });
 };
 
@@ -39,7 +48,7 @@ export const useAddItemToProductListMutation = () => {
       return addItemToProductList({ data });
     },
     meta: {
-      sucessMessage: 'Done',
+      sucessMessage: "Done",
       invalidateQuery: getProductListQueryOptions().queryKey,
     },
   });

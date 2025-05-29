@@ -18,6 +18,8 @@ import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as CategoryCategoryIdImport } from './routes/category/$categoryId'
 import { Route as AccountWishlistImport } from './routes/_account/wishlist'
+import { Route as AccountOrderHistoryImport } from './routes/_account/order-history'
+import { Route as AccountAddressImport } from './routes/_account/address'
 import { Route as AccountAccountImport } from './routes/_account/account'
 
 // Create/Update Routes
@@ -60,6 +62,18 @@ const CategoryCategoryIdRoute = CategoryCategoryIdImport.update({
 const AccountWishlistRoute = AccountWishlistImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => AccountRoute,
+} as any)
+
+const AccountOrderHistoryRoute = AccountOrderHistoryImport.update({
+  id: '/order-history',
+  path: '/order-history',
+  getParentRoute: () => AccountRoute,
+} as any)
+
+const AccountAddressRoute = AccountAddressImport.update({
+  id: '/address',
+  path: '/address',
   getParentRoute: () => AccountRoute,
 } as any)
 
@@ -108,6 +122,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountAccountImport
       parentRoute: typeof AccountImport
     }
+    '/_account/address': {
+      id: '/_account/address'
+      path: '/address'
+      fullPath: '/address'
+      preLoaderRoute: typeof AccountAddressImport
+      parentRoute: typeof AccountImport
+    }
+    '/_account/order-history': {
+      id: '/_account/order-history'
+      path: '/order-history'
+      fullPath: '/order-history'
+      preLoaderRoute: typeof AccountOrderHistoryImport
+      parentRoute: typeof AccountImport
+    }
     '/_account/wishlist': {
       id: '/_account/wishlist'
       path: '/wishlist'
@@ -136,11 +164,15 @@ declare module '@tanstack/react-router' {
 
 interface AccountRouteChildren {
   AccountAccountRoute: typeof AccountAccountRoute
+  AccountAddressRoute: typeof AccountAddressRoute
+  AccountOrderHistoryRoute: typeof AccountOrderHistoryRoute
   AccountWishlistRoute: typeof AccountWishlistRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
   AccountAccountRoute: AccountAccountRoute,
+  AccountAddressRoute: AccountAddressRoute,
+  AccountOrderHistoryRoute: AccountOrderHistoryRoute,
   AccountWishlistRoute: AccountWishlistRoute,
 }
 
@@ -153,6 +185,8 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/account': typeof AccountAccountRoute
+  '/address': typeof AccountAddressRoute
+  '/order-history': typeof AccountOrderHistoryRoute
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -164,6 +198,8 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/account': typeof AccountAccountRoute
+  '/address': typeof AccountAddressRoute
+  '/order-history': typeof AccountOrderHistoryRoute
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -176,6 +212,8 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/_account/account': typeof AccountAccountRoute
+  '/_account/address': typeof AccountAddressRoute
+  '/_account/order-history': typeof AccountOrderHistoryRoute
   '/_account/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -189,6 +227,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/account'
+    | '/address'
+    | '/order-history'
     | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
@@ -199,6 +239,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/account'
+    | '/address'
+    | '/order-history'
     | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
@@ -209,6 +251,8 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/login'
     | '/_account/account'
+    | '/_account/address'
+    | '/_account/order-history'
     | '/_account/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
@@ -258,6 +302,8 @@ export const routeTree = rootRoute
       "filePath": "_account.tsx",
       "children": [
         "/_account/account",
+        "/_account/address",
+        "/_account/order-history",
         "/_account/wishlist"
       ]
     },
@@ -269,6 +315,14 @@ export const routeTree = rootRoute
     },
     "/_account/account": {
       "filePath": "_account/account.tsx",
+      "parent": "/_account"
+    },
+    "/_account/address": {
+      "filePath": "_account/address.tsx",
+      "parent": "/_account"
+    },
+    "/_account/order-history": {
+      "filePath": "_account/order-history.tsx",
       "parent": "/_account"
     },
     "/_account/wishlist": {

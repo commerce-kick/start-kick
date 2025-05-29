@@ -17,6 +17,14 @@ function RouteComponent() {
           <Button variant="ghost" asChild className="justify-start">
             <Link to="/wishlist">Wislist</Link>
           </Button>
+
+          <Button variant="ghost" asChild className="justify-start">
+            <Link to="/order-history">Order history</Link>
+          </Button>
+
+          <Button variant="ghost" asChild className="justify-start">
+            <Link to="/address">Address</Link>
+          </Button>
         </div>
       </aside>
       <main className="py-12">

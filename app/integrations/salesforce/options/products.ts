@@ -18,7 +18,7 @@ import {
 
 export const getProductsQueryOptions = (params: ProductSearchParams) => {
   return queryOptions<ShopperSearchTypes.ProductSearchResult>({
-    queryKey: ["products", "list", params],
+    queryKey: ["products", "list", { ...params }],
     queryFn: async () => getProducts({ data: params }) as any,
   });
 };

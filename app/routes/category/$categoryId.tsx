@@ -3,15 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -37,15 +28,15 @@ import {
 import { Filter, Grid3X3, List, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
+import { CommercePagination } from "@/components/commerce/commerce-pagination";
 import ProductCard from "@/components/commerce/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWishList } from "@/hooks/use-wishlist";
+import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { useAddItemToProductListMutation } from "@/integrations/salesforce/options/customer";
 import { cn } from "@/lib/utils";
 import type { ShopperSearchTypes } from "commerce-sdk-isomorphic";
 import { z } from "zod";
-
-const REQUESTED_LIMIT = 25;
 
 export const Route = createFileRoute("/category/$categoryId")({
   component: RouteComponent,
@@ -60,7 +51,8 @@ export const Route = createFileRoute("/category/$categoryId")({
     await queryClient.ensureQueryData(
       getProductsQueryOptions({
         refine: [`cgid:${params.categoryId}`],
-        limit: 12,
+        limit: REQUESTED_LIMIT,
+        ...params,
       }),
     );
   },
@@ -215,149 +207,6 @@ const FiltersContent = ({
     </div>
   );
 };
-
-function ProductPagination({
-  data,
-  requestedLimit,
-}: {
-  requestedLimit: number;
-  data: ShopperSearchTypes.ProductSearchResult;
-}) {
-  const { offset = 0 } = useSearch({ from: "/category/$categoryId" });
-  const navigate = useNavigate({ from: "/category/$categoryId" });
-
-  const { total } = data;
-  const limit = requestedLimit;
-
-  const currentPage = Math.floor(offset / limit) + 1;
-  const totalPages = Math.ceil(total / limit);
-  const hasNext = offset + limit < total;
-  const hasPrev = offset > 0;
-
-  const itemsStart = offset + 1;
-  const itemsEnd = Math.min(offset + limit, total);
-
-  const goToPage = (page: number) => {
-    const newOffset = (page - 1) * limit;
-    navigate({
-      search: (prev) => ({ ...prev, offset: newOffset }),
-    });
-  };
-
-  const nextPage = () => {
-    if (hasNext) {
-      navigate({
-        search: (prev) => ({ ...prev, offset: offset + limit }),
-      });
-    }
-  };
-
-  const prevPage = () => {
-    if (hasPrev) {
-      navigate({
-        search: (prev) => ({ ...prev, offset: Math.max(0, offset - limit) }),
-      });
-    }
-  };
-
-  // Generate visible page numbers
-  const getVisiblePages = () => {
-    const pages: (number | "ellipsis")[] = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push("ellipsis");
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push("ellipsis");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
-  if (totalPages <= 1) {
-    return (
-      <div className="py-4 text-center">
-        <p className="text-muted-foreground text-sm">
-          Showing {total} {total === 1 ? "product" : "products"}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Results info */}
-      <div className="text-center">
-        <p className="text-muted-foreground text-sm">
-          Showing {itemsStart}-{itemsEnd} of {total} products
-        </p>
-      </div>
-
-      {/* Pagination */}
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={prevPage}
-              className={cn(!hasPrev && "pointer-events-none opacity-50")}
-            />
-          </PaginationItem>
-
-          {getVisiblePages().map((page, index) => (
-            <PaginationItem key={index}>
-              {page === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  onClick={() => goToPage(page)}
-                  isActive={page === currentPage}
-                >
-                  {page}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={nextPage}
-              className={cn(!hasNext && "pointer-events-none opacity-50")}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-
-      {/* Page info */}
-      <div className="text-center">
-        <p className="text-muted-foreground text-xs">
-          Page {currentPage} of {totalPages}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function ProductGridSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
   return (
@@ -697,7 +546,12 @@ function RouteComponent() {
                 ))}
               </div>
 
-              <ProductPagination data={data} requestedLimit={REQUESTED_LIMIT} />
+              <CommercePagination
+                total={data.total}
+                offset={offset}
+                requestedLimit={REQUESTED_LIMIT}
+                navigate={navigate}
+              />
             </>
           ) : (
             <Card>
