@@ -1,4 +1,3 @@
-import SearchHit from "@/components/commerce/search-hit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +37,7 @@ import {
 import { Filter, Grid3X3, List, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
+import ProductCard from "@/components/commerce/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWishList } from "@/hooks/use-wishlist";
 import { useAddItemToProductListMutation } from "@/integrations/salesforce/options/customer";
@@ -683,7 +683,7 @@ function RouteComponent() {
                 )}
               >
                 {data.hits.map((product) => (
-                  <SearchHit
+                  <ProductCard
                     product={product}
                     key={product.productId}
                     viewMode={viewMode}

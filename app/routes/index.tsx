@@ -1,5 +1,5 @@
 // app/routes/index.tsx
-import SearchHit from "@/components/commerce/search-hit";
+import ProductCard from "@/components/commerce/product-card";
 import HoverBox from "@/components/magic/hover-box";
 import { InteractiveGridPattern } from "@/components/magic/interactive-pattern";
 import { TextAnimate } from "@/components/magic/text-animate";
@@ -33,9 +33,9 @@ function FeatureCard({ icon, title, description }: any) {
   return (
     <HoverBox>
       <Card className="flex flex-col p-6">
-        <div className="mb-4 text-primary">{icon}</div>
+        <div className="text-primary mb-4">{icon}</div>
         <h3 className="mb-2 text-xl font-medium">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground text-sm">{description}</p>
       </Card>
     </HoverBox>
   );
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/")({
       getProductsQueryOptions({
         refine: ["cgid=root"],
         limit: 10,
-      })
+      }),
     );
   },
 });
@@ -60,17 +60,17 @@ function Home() {
     getProductsQueryOptions({
       refine: ["cgid=root"],
       limit: 10,
-    })
+    }),
   );
 
   return (
     <div className="flex min-h-screen flex-col">
-      <section className="container mx-auto grid items-center gap-8 pb-8 pt-6 md:py-10 lg:grid-cols-2">
-        <div className="flex w-full items-start justify-center absolute inset-0">
+      <section className="container mx-auto grid items-center gap-8 pt-6 pb-8 md:py-10 lg:grid-cols-2">
+        <div className="absolute inset-0 flex w-full items-start justify-center">
           <InteractiveGridPattern
             className={cn(
               "[mask-image:radial-gradient(500px_circle_at_top_center,white,transparent)]",
-              "relative w-auto h-auto"
+              "relative h-auto w-auto",
             )}
             width={50}
             height={50}
@@ -78,36 +78,36 @@ function Home() {
             squaresClassName="hover:fill-blue-500"
           />
         </div>
-        <div className="flex flex-col items-start gap-4 relative z-10">
+        <div className="relative z-10 flex flex-col items-start gap-4">
           <TextAnimate
             animation="fadeIn"
             className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
           >
             The Start Starter Store for Retail
           </TextAnimate>
-          <p className="text-lg text-muted-foreground">
-            A modern, high-performance e-commerce starter kit built with TanStack Start
-            and shadcn/ui
+          <p className="text-muted-foreground text-lg">
+            A modern, high-performance e-commerce starter kit built with
+            TanStack Start and shadcn/ui
           </p>
           <Button size="lg" className="mt-4">
             Get started
           </Button>
         </div>
         <div className="flex justify-center">
-          <div className="relative w-full capitalize aspect-video bg-secondary/5 border border-border rounded-lg shadow-sm justify-center items-center flex text-4xl backdrop-blur-sm pointer-events-none">
+          <div className="bg-secondary/5 border-border pointer-events-none relative flex aspect-video w-full items-center justify-center rounded-lg border text-4xl capitalize shadow-sm backdrop-blur-sm">
             The modern Monolith
           </div>
         </div>
       </section>
 
-      <section className="container mx-auto py-8 md:py-12 relative z-10">
+      <section className="relative z-10 container mx-auto py-8 md:py-12">
         <div className="grid gap-6 md:grid-cols-3">
-          <Card className="flex flex-col items-center p-6 text-center hover:-translate-y-2.5 transition-all">
-            <div className="mb-4 rounded-full bg-primary/10 p-3">
-              <Code className="h-6 w-6 text-primary" />
+          <Card className="flex flex-col items-center p-6 text-center transition-all hover:-translate-y-2.5">
+            <div className="bg-primary/10 mb-4 rounded-full p-3">
+              <Code className="text-primary h-6 w-6" />
             </div>
             <h3 className="mb-2 text-xl font-medium">Download on GitHub</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-sm">
               Get the source code and start building your store
             </p>
             <Button variant="outline" className="mt-auto">
@@ -115,14 +115,14 @@ function Home() {
             </Button>
           </Card>
 
-          <Card className="flex flex-col items-center p-6 text-center hover:-translate-y-2.5 transition-all">
-            <div className="mb-4 rounded-full bg-primary/10 p-3">
-              <ExternalLink className="h-6 w-6 text-primary" />
+          <Card className="flex flex-col items-center p-6 text-center transition-all hover:-translate-y-2.5">
+            <div className="bg-primary/10 mb-4 rounded-full p-3">
+              <ExternalLink className="text-primary h-6 w-6" />
             </div>
             <h3 className="mb-2 text-xl font-medium">
               Deploy on Managed Runtime
             </h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-sm">
               Deploy your store with one click to a managed platform
             </p>
             <Button variant="outline" className="mt-auto">
@@ -130,12 +130,12 @@ function Home() {
             </Button>
           </Card>
 
-          <Card className="flex flex-col items-center p-6 text-center hover:-translate-y-2.5 transition-all">
-            <div className="mb-4 rounded-full bg-primary/10 p-3">
-              <FileArchive className="h-6 w-6 text-primary" />
+          <Card className="flex flex-col items-center p-6 text-center transition-all hover:-translate-y-2.5">
+            <div className="bg-primary/10 mb-4 rounded-full p-3">
+              <FileArchive className="text-primary h-6 w-6" />
             </div>
             <h3 className="mb-2 text-xl font-medium">Documentation</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-4 text-sm">
               Design your store with our documentation
             </p>
             <Button variant="outline" className="mt-auto" asChild>
@@ -153,7 +153,7 @@ function Home() {
           <h2 className="mb-8 text-center text-3xl font-bold tracking-tight">
             Shop Products
           </h2>
-          <p className="mb-10 text-center text-muted-foreground">
+          <p className="text-muted-foreground mb-10 text-center">
             This section contains content from the catalog.{" "}
             <Link to="/" className="text-primary underline">
               Read docs
@@ -165,7 +165,7 @@ function Home() {
             <CarouselContent>
               {products.hits?.map((product, index) => (
                 <CarouselItem key={`product-${index}`} className="md:basis-1/4">
-                  <SearchHit product={product} />
+                  <ProductCard product={product} />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -179,7 +179,7 @@ function Home() {
         <h2 className="mb-4 text-center text-3xl font-bold tracking-tight">
           Features
         </h2>
-        <p className="mb-12 text-center text-muted-foreground">
+        <p className="text-muted-foreground mb-12 text-center">
           Out-of-the-box features so that you focus only on adding enhancements.
         </p>
 
@@ -227,7 +227,7 @@ function Home() {
           <h2 className="mb-4 text-3xl font-bold tracking-tight">
             We're here to help
           </h2>
-          <p className="mx-auto mb-8 max-w-md text-muted-foreground">
+          <p className="text-muted-foreground mx-auto mb-8 max-w-md">
             Contact our support staff. They will get you to the right place.
           </p>
           <Button>

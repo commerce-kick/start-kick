@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Minus, Plus, Share2, ShoppingCart, Trash2 } from "lucide-react";
+import { Heart, Share2, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 
+import ProductCard from "@/components/commerce/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Image from "@/components/ui/image";
 import { Separator } from "@/components/ui/separator";
 import { useWishList } from "@/hooks/use-wishlist";
 import { getProductsByIdsQueryOptions } from "@/integrations/salesforce/options/products";
+import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
 
 export const Route = createFileRoute("/_account/wishlist")({
   component: RouteComponent,
@@ -131,121 +132,13 @@ function RouteComponent() {
       <div className="grid gap-6">
         {wishlistItems.map((item) => {
           const product = products.find((p) => p.id === item.productId);
-          const isUpdating = updatingItems.has(item.id || "");
-          const productImage = product?.imageGroups?.[0]?.images?.[0];
 
           return (
-            <Card key={item.id} className="overflow-hidden py-0">
-              <CardContent className="p-6">
-                <div className="flex gap-6">
-                  <div className="relative h-32 w-32 flex-shrink-0">
-                    {productImage ? (
-                      <Image
-                        src={productImage.link || "/placeholder.svg"}
-                        alt={
-                          productImage.alt || product?.name || "Product image"
-                        }
-                        className="rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="bg-muted flex h-full w-full items-center justify-center rounded-lg">
-                        <Heart className="text-muted-foreground h-8 w-8" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-start justify-between">
-                      <div>
-                        <h3 className="line-clamp-2 text-lg font-semibold">
-                          {product?.name || "Product not found"}
-                        </h3>
-                        {product?.brand && (
-                          <p className="text-muted-foreground text-sm">
-                            {product.brand}
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveItem(item.id || "")}
-                        disabled={isUpdating}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {product?.shortDescription && (
-                      <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
-                        {product.shortDescription}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="text-2xl font-bold">
-                          {product?.currency || "$"}
-                          {product?.price?.toFixed(2) || "0.00"}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleUpdateQuantity(
-                                item.id || "",
-                                item.quantity - 1,
-                              )
-                            }
-                            disabled={item.quantity <= 1 || isUpdating}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-8 text-center font-medium">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleUpdateQuantity(
-                                item.id || "",
-                                item.quantity + 1,
-                              )
-                            }
-                            disabled={isUpdating}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={() =>
-                          handleAddToCart(item.productId || "", item.quantity)
-                        }
-                        disabled={!product || isUpdating}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Add to Cart
-                      </Button>
-                    </div>
-
-                    {product?.availability?.messages &&
-                      product.availability.messages.length > 0 && (
-                        <div className="mt-3">
-                          <Badge variant="outline" className="text-xs">
-                            {product.availability.messages[0]}
-                          </Badge>
-                        </div>
-                      )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProductCard
+              product={product as ShopperProductsTypes.Product}
+              viewMode="list"
+              isFavorite={true}
+            />
           );
         })}
       </div>

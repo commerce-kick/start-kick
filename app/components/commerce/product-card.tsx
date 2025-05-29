@@ -1,4 +1,4 @@
-/* I just ask to v0 to enhace the ui, it does all the refinaments logic */
+import type React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,12 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import type { ShopperSearchTypes } from "commerce-sdk-isomorphic";
+import type {
+  ShopperProductsTypes,
+  ShopperSearchTypes,
+} from "commerce-sdk-isomorphic";
 import {
   ArrowRight,
-  Eye,
   Heart,
   Shield,
   ShoppingCart,
@@ -30,55 +32,117 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-interface ProductCardProps {
-  product: ShopperSearchTypes.ProductSearchHit;
-  viewMode?: "grid" | "list";
-  onWishListToggle?: () => void;
-  isFavorite?: boolean;
+// Union type for both product types
+type ProductLike =
+  | ShopperSearchTypes.ProductSearchHit
+  | ShopperProductsTypes.Product;
+
+// Normalized product interface that handles differences between the two types
+interface NormalizedProduct {
+  id: string;
+  name: string;
+  image?: string;
+  imageAlt?: string;
+  price?: number;
+  priceMax?: number;
+  currency: string;
+  orderable: boolean;
+  promotions?: Array<any>;
+  imageGroups?: Array<any>;
+  priceRanges?: Array<any>;
+  brand?: string;
+  shortDescription?: string;
+  longDescription?: string;
 }
 
-export default function SearchHit({
-  product: {
-    productId,
-    productName,
-    image,
-    price,
-    priceMax,
-    currency = "USD",
-    orderable = true,
-    productPromotions,
-    imageGroups,
-    priceRanges,
-  },
+// Utility function to normalize product data
+function normalizeProduct(product: ProductLike): NormalizedProduct {
+  // Type guards to check which type we're dealing with
+  const isSearchHit = "productId" in product;
+
+  if (isSearchHit) {
+    const searchHit = product as ShopperSearchTypes.ProductSearchHit;
+    return {
+      id: searchHit.productId,
+      name: searchHit.productName || `Product ${searchHit.productId}`,
+      image:
+        searchHit.image?.link || searchHit.imageGroups?.[0]?.images?.[0]?.link,
+      imageAlt: searchHit.image?.alt || searchHit.productName,
+      price: searchHit.price,
+      priceMax: searchHit.priceMax,
+      currency: searchHit.currency || "USD",
+      orderable: searchHit.orderable ?? true,
+      promotions: searchHit.productPromotions,
+      imageGroups: searchHit.imageGroups,
+      priceRanges: searchHit.priceRanges,
+    };
+  } else {
+    const productData = product as ShopperProductsTypes.Product;
+    return {
+      id: productData.id,
+      name: productData.name || `Product ${productData.id}`,
+      image: productData.imageGroups?.[0]?.images?.[0]?.link,
+      imageAlt: productData.name,
+      price: productData.price,
+      priceMax: productData.priceMax,
+      currency: productData.currency || "USD",
+      orderable: true, // Products are generally orderable unless specified
+      promotions: productData.productPromotions,
+      imageGroups: productData.imageGroups,
+      priceRanges: productData.priceRanges,
+      brand: productData.brand,
+      shortDescription: productData.shortDescription,
+      longDescription: productData.longDescription,
+    };
+  }
+}
+
+interface ProductCardProps {
+  product: ProductLike;
+  viewMode?: "grid" | "list";
+  onWishListToggle?: (productId: string) => void;
+  isFavorite?: boolean;
+  showBrand?: boolean;
+  showDescription?: boolean;
+  className?: string;
+}
+
+export default function ProductCard({
+  product,
   viewMode = "grid",
   onWishListToggle,
-  isFavorite,
+  isFavorite = false,
+  showBrand = false,
+  showDescription = false,
+  className,
 }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(isFavorite ?? false);
+  const [isWishlisted, setIsWishlisted] = useState(isFavorite);
   const [imageError, setImageError] = useState(false);
 
+  // Normalize the product data
+  const normalizedProduct = normalizeProduct(product);
+
   // Get the primary image with fallback
-  const primaryImage = !imageError
-    ? image?.link || imageGroups?.[0]?.images?.[0]?.link
-    : null;
-  const imageAlt = image?.alt || productName || "Product image";
+  const primaryImage = !imageError ? normalizedProduct.image : null;
+  const imageAlt =
+    normalizedProduct.imageAlt || normalizedProduct.name || "Product image";
 
   // Format price display
   const formatPrice = (amount?: number) => {
     if (!amount) return null;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency,
+      currency: normalizedProduct.currency,
     }).format(amount);
   };
 
   // Get price range if available
-  const priceRange = priceRanges?.[0];
-  const displayPrice = price || priceRange?.minPrice;
-  const displayMaxPrice = priceMax || priceRange?.maxPrice;
+  const priceRange = normalizedProduct.priceRanges?.[0];
+  const displayPrice = normalizedProduct.price || priceRange?.minPrice;
+  const displayMaxPrice = normalizedProduct.priceMax || priceRange?.maxPrice;
 
   // Get promotion info
-  const promotion = productPromotions?.[0];
+  const promotion = normalizedProduct.promotions?.[0];
   const hasPromotion =
     promotion?.promotionalPrice &&
     promotion.promotionalPrice < (displayPrice || 0);
@@ -99,21 +163,22 @@ export default function SearchHit({
     e.preventDefault();
     e.stopPropagation();
 
-    onWishListToggle?.();
-
+    onWishListToggle?.(normalizedProduct.id);
     setIsWishlisted(!isWishlisted);
   };
 
-  const handleQuickView = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Implement quick view modal
-    console.log("Quick view for product:", productId);
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   if (viewMode === "list") {
     return (
-      <Card className="group overflow-hidden border py-0 transition-all duration-300 hover:shadow-lg">
+      <Card
+        className={cn(
+          "group overflow-hidden border py-0 transition-all duration-300 hover:shadow-lg",
+          className,
+        )}
+      >
         <div className="flex">
           {/* Image Section */}
           <div className="relative h-64 w-64 flex-shrink-0">
@@ -122,6 +187,7 @@ export default function SearchHit({
                 src={primaryImage || "/placeholder.svg?height=200&width=200"}
                 alt={imageAlt}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={handleImageError}
               />
 
               {/* Promotion badge */}
@@ -135,7 +201,7 @@ export default function SearchHit({
               )}
 
               {/* Stock status overlay */}
-              {!orderable && (
+              {!normalizedProduct.orderable && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                   <Badge variant="secondary" className="text-sm">
                     Out of Stock
@@ -150,26 +216,17 @@ export default function SearchHit({
             <div className="space-y-3">
               {/* Product name and quick actions */}
               <div className="flex items-start justify-between">
-                <h3 className="text-lg leading-tight font-semibold">
-                  {productName || `Product ${productId}`}
-                </h3>
+                <div className="space-y-1">
+                  <h3 className="text-lg leading-tight font-semibold">
+                    {normalizedProduct.name}
+                  </h3>
+                  {showBrand && normalizedProduct.brand && (
+                    <p className="text-muted-foreground text-sm">
+                      {normalizedProduct.brand}
+                    </p>
+                  )}
+                </div>
                 <div className="ml-4 flex items-center gap-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
-                          onClick={handleQuickView}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Quick View</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -199,6 +256,13 @@ export default function SearchHit({
                   </TooltipProvider>
                 </div>
               </div>
+
+              {/* Description */}
+              {showDescription && normalizedProduct.shortDescription && (
+                <p className="text-muted-foreground line-clamp-2 text-sm">
+                  {normalizedProduct.shortDescription}
+                </p>
+              )}
 
               {/* Rating */}
               <div className="flex items-center gap-2">
@@ -270,12 +334,15 @@ export default function SearchHit({
             <div className="mt-4">
               <Button
                 className="w-full sm:w-auto"
-                disabled={!orderable}
+                disabled={!normalizedProduct.orderable}
                 size="lg"
                 asChild
               >
-                <Link to="/products/$productId" params={{ productId }}>
-                  {orderable ? (
+                <Link
+                  to="/products/$productId"
+                  params={{ productId: normalizedProduct.id }}
+                >
+                  {normalizedProduct.orderable ? (
                     <>
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       View Product
@@ -295,13 +362,19 @@ export default function SearchHit({
 
   // Grid view (default)
   return (
-    <Card className="group flex h-full flex-col overflow-hidden border-0 pt-0 shadow-sm transition-all duration-300 hover:shadow-xl">
+    <Card
+      className={cn(
+        "group flex h-full flex-col overflow-hidden border-0 pt-0 shadow-sm transition-all duration-300 hover:shadow-xl",
+        className,
+      )}
+    >
       <CardHeader className="p-0">
         <div className="relative aspect-square overflow-hidden bg-gray-50">
           <Image
             src={primaryImage || "/placeholder.svg?height=300&width=300"}
             alt={imageAlt}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={handleImageError}
           />
 
           {/* Promotion badge */}
@@ -316,22 +389,6 @@ export default function SearchHit({
 
           {/* Quick actions overlay */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="h-8 w-8 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
-                    onClick={handleQuickView}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="left">Quick View</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -357,7 +414,7 @@ export default function SearchHit({
           </div>
 
           {/* Stock status overlay */}
-          {!orderable && (
+          {!normalizedProduct.orderable && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50">
               <Badge variant="secondary" className="text-sm">
                 Out of Stock
@@ -378,10 +435,24 @@ export default function SearchHit({
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col space-y-3">
-        {/* Product name */}
-        <h3 className="line-clamp-2 text-sm leading-tight font-semibold">
-          {productName || `Product ${productId}`}
-        </h3>
+        {/* Product name and brand */}
+        <div className="space-y-1">
+          <h3 className="line-clamp-2 text-sm leading-tight font-semibold">
+            {normalizedProduct.name}
+          </h3>
+          {showBrand && normalizedProduct.brand && (
+            <p className="text-muted-foreground text-xs">
+              {normalizedProduct.brand}
+            </p>
+          )}
+        </div>
+
+        {/* Description */}
+        {showDescription && normalizedProduct.shortDescription && (
+          <p className="text-muted-foreground line-clamp-2 text-xs">
+            {normalizedProduct.shortDescription}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-2">
@@ -442,12 +513,15 @@ export default function SearchHit({
       <CardFooter className="pt-0">
         <Button
           className="group/btn w-full"
-          disabled={!orderable}
+          disabled={!normalizedProduct.orderable}
           size="sm"
           asChild
         >
-          <Link to="/products/$productId" params={{ productId }}>
-            {orderable ? (
+          <Link
+            to="/products/$productId"
+            params={{ productId: normalizedProduct.id }}
+          >
+            {normalizedProduct.orderable ? (
               <>
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 View Product
