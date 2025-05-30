@@ -107,3 +107,10 @@ export interface CreateOrderParams {
   params?: {};
   body: ShopperBasketsTypes.Basket;
 }
+
+export interface SearchSuggestionsParams {
+  q: string;
+  limit?: number;
+  currency?: string;
+  locale?: string;
+}

@@ -10,7 +10,7 @@ import { Footer } from "@/components/commerce/footer";
 import { Header } from "@/components/commerce/header";
 import { Toaster } from "@/components/ui/sonner";
 import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
-import { getCategoryQueryOptions } from "@/integrations/salesforce/options/search";
+import { getCategoryQueryOptions } from "@/integrations/salesforce/options/products";
 import appCss from "@/styles/app.css?url";
 import { QueryClient, useSuspenseQueries } from "@tanstack/react-query";
 

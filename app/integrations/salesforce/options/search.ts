@@ -1,21 +1,17 @@
-import { getCategory } from "@/integrations/salesforce/server/search";
+import { getSearchSuggestions } from "@/integrations/salesforce/server/search";
+import { SearchSuggestionsParams } from "@/integrations/salesforce/types";
 import { queryOptions } from "@tanstack/react-query";
 
-import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
-
-export const getCategoryQueryOptions = (params: {
-  id: string;
-  levels?: number;
-}) => {
-  return queryOptions<ShopperProductsTypes.Category>({
-    queryKey: ["category", params],
+export const getSearchSuggestionsOptions = (
+  params: SearchSuggestionsParams,
+) => {
+  return queryOptions({
+    queryKey: ["category", { ...params }],
     queryFn: async () => {
-      return getCategory({
-        data: {
-          id: params.id,
-          levels: params.levels,
-        },
+      return getSearchSuggestions({
+        data: params,
       });
     },
+    enabled: params.q.length >= 3,
   });
 };

@@ -1,4 +1,5 @@
 import {
+  getCategory,
   getProduct,
   getProducts,
   getProductsByIds,
@@ -55,5 +56,22 @@ export const getProductsByIdsQueryOptions = (
   return queryOptions({
     queryKey: ["products", params],
     queryFn: async () => getProductsByIds({ data: params }),
+  });
+};
+
+export const getCategoryQueryOptions = (params: {
+  id: string;
+  levels?: number;
+}) => {
+  return queryOptions<ShopperProductsTypes.Category>({
+    queryKey: ["category", params],
+    queryFn: async () => {
+      return getCategory({
+        data: {
+          id: params.id,
+          levels: params.levels,
+        },
+      });
+    },
   });
 };

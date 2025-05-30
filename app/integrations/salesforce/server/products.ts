@@ -59,3 +59,16 @@ export const getProductsByIds = createServerFn({ method: "GET" })
       },
     });
   });
+
+export const getCategory = createServerFn({ method: "GET" })
+  .validator((data: { id: string; levels?: number }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperProducts = await api.shopperProducts();
+    return await shopperProducts.getCategory({
+      parameters: {
+        id: data.id,
+        levels: data.levels || 2,
+      },
+    });
+  });
