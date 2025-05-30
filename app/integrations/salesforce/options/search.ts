@@ -6,7 +6,7 @@ export const getSearchSuggestionsOptions = (
   params: SearchSuggestionsParams,
 ) => {
   return queryOptions({
-    queryKey: ["category", { ...params }],
+    queryKey: ["searchSuggestions", { ...params }],
     queryFn: async () => {
       return getSearchSuggestions({
         data: params,
