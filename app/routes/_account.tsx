@@ -6,9 +6,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useMatches,
+} from "@tanstack/react-router";
 import { Heart, MapPin, Menu, ShoppingBag, User } from "lucide-react";
 
 export const Route = createFileRoute("/_account")({
@@ -30,7 +40,9 @@ function RouteComponent() {
     <div className="container py-8 md:py-10">
       <div className="mb-8">
         <h1 className="text-4xl font-bold">My Account</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <p className="text-muted-foreground">
+          Manage your account settings and preferences
+        </p>
       </div>
 
       <div className="flex flex-col gap-8 md:flex-row">
@@ -46,9 +58,10 @@ function RouteComponent() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <div className="grid gap-2 py-6">
-                <h3 className="text-lg font-semibold mb-2">Account Menu</h3>
-                <Separator className="mb-4" />
+              <SheetHeader>
+                <SheetTitle>Account Menu</SheetTitle>
+              </SheetHeader>
+              <div className="grid gap-2 px-4">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentPath === item.path;
@@ -72,7 +85,7 @@ function RouteComponent() {
         </div>
 
         {/* Sidebar Navigation */}
-        <aside className="hidden md:block w-64 shrink-0">
+        <aside className="hidden w-64 shrink-0 md:block">
           <Card className="">
             <CardHeader className="pb-3">
               <CardTitle>Account</CardTitle>
@@ -87,7 +100,7 @@ function RouteComponent() {
                     key={item.path}
                     variant={isActive ? "secondary" : "ghost"}
                     asChild
-                    className="justify-start rounded-none h-12"
+                    className="h-12 justify-start rounded-none"
                   >
                     <Link to={item.path}>
                       <Icon className="mr-2 h-5 w-5" />
