@@ -1,27 +1,9 @@
-import type React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
 import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail("");
-      // Here you would typically send this to your API
-      setTimeout(() => {
-        setSubscribed(false);
-      }, 3000);
-    }
-  };
-
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -40,24 +22,6 @@ export function Footer() {
               Subscribe to our newsletter for the latest products, promotions,
               and exclusive offers.
             </p>
-          </div>
-          <div className="w-full md:w-auto">
-            <form
-              onSubmit={handleSubscribe}
-              className="flex w-full flex-col gap-3 sm:flex-row md:w-auto"
-            >
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="min-w-[240px]"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <Button type="submit" disabled={subscribed}>
-                {subscribed ? "Subscribed!" : "Subscribe"}
-              </Button>
-            </form>
           </div>
         </div>
       </div>

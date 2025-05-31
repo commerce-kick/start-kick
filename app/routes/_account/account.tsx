@@ -22,13 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
 import { cn } from "@/lib/utils";
@@ -36,14 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
-import {
-  Building,
-  CalendarIcon,
-  Phone,
-  Save,
-  Settings,
-  User,
-} from "lucide-react";
+import { CalendarIcon, Phone, Settings, User2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -134,21 +120,16 @@ function RouteComponent() {
   const isEnabled = form.watch("enabled");
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Account Details</h1>
-          <p className="text-muted-foreground">
-            Manage your account information and preferences
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+          <User2 className="text-primary h-5 w-5" />
         </div>
-        <div className="flex items-center gap-2">
-          {form.formState.isDirty && (
-            <Button type="submit" form="customer-form" className="gap-2">
-              <Save className="h-4 w-4" />
-              Save Changes
-            </Button>
-          )}
+        <div>
+          <h1 className="text-3xl font-bold">My Account</h1>
+          <p className="text-muted-foreground">
+            Manage your shipping addresses
+          </p>
         </div>
       </div>
 
@@ -159,62 +140,15 @@ function RouteComponent() {
           className="space-y-6"
         >
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Personal Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                  <User2 className="h-5 w-5" />
                   Personal Information
                 </CardTitle>
                 <CardDescription>Your basic personal details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="salutation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Salutation</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Mr.">Mr.</SelectItem>
-                            <SelectItem value="Mrs.">Mrs.</SelectItem>
-                            <SelectItem value="Ms.">Ms.</SelectItem>
-                            <SelectItem value="Dr.">Dr.</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Senior, Junior"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -244,34 +178,6 @@ function RouteComponent() {
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="secondName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Middle Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="suffix"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Suffix</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Jr., Sr., III" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}
@@ -310,32 +216,6 @@ function RouteComponent() {
                           />
                         </PopoverContent>
                       </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">Male</SelectItem>
-                          <SelectItem value="2">Female</SelectItem>
-                          <SelectItem value="0">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -380,164 +260,37 @@ function RouteComponent() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="phoneMobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile Phone</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phoneBusiness"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Phone</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="fax"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fax</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferredLocale"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preferred Language</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select language" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="en-US">English (US)</SelectItem>
-                          <SelectItem value="en-GB">English (UK)</SelectItem>
-                          <SelectItem value="es-ES">Spanish</SelectItem>
-                          <SelectItem value="fr-FR">French</SelectItem>
-                          <SelectItem value="de-DE">German</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Business Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5" />
-                  Business Information
-                </CardTitle>
-                <CardDescription>Professional details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="companyName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="jobTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Account Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Account Settings
-                </CardTitle>
-                <CardDescription>
-                  Account status and authentication
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="login"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username *</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        This will be used to log into your account
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
           </div>
+
+          {/* Account Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Account Settings
+              </CardTitle>
+              <CardDescription>
+                Account status and authentication
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
 
           {/* Notes Section */}
           <Card>

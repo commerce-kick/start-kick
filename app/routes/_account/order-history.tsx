@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { getCustomerOrdersQueryOptions } from "@/integrations/salesforce/options/customer";
+import { Address } from "@/integrations/salesforce/types/api";
+import { formatAddress, formatCurrency } from "@/lib/commerce";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
@@ -13,7 +15,6 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 import { format } from "date-fns";
 import {
   AlertCircle,
@@ -30,7 +31,7 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_account/order-history")({
@@ -47,149 +48,107 @@ export const Route = createFileRoute("/_account/order-history")({
   },
 });
 
+const getStatusBadge = (
+  status: string,
+  type: "order" | "payment" | "shipping" | "confirmation",
+) => {
+  const statusConfig: StatusTypeMap = {
+    order: {
+      created: {
+        variant: "secondary",
+        icon: Clock,
+        label: "Created",
+      },
+      confirmed: {
+        variant: "default",
+        icon: CheckCircle,
+        label: "Confirmed",
+      },
+      cancelled: {
+        variant: "destructive",
+        icon: XCircle,
+        label: "Cancelled",
+      },
+      completed: {
+        variant: "default",
+        icon: CheckCircle,
+        label: "Completed",
+      },
+    },
+    payment: {
+      not_paid: {
+        variant: "destructive",
+        icon: AlertCircle,
+        label: "Not Paid",
+      },
+      paid: { variant: "default", icon: CheckCircle, label: "Paid" },
+      partially_paid: {
+        variant: "secondary",
+        icon: Clock,
+        label: "Partially Paid",
+      },
+    },
+    shipping: {
+      not_shipped: {
+        variant: "secondary",
+        icon: Package,
+        label: "Not Shipped",
+      },
+      shipped: { variant: "default", icon: Truck, label: "Shipped" },
+      delivered: {
+        variant: "default",
+        icon: CheckCircle,
+        label: "Delivered",
+      },
+    },
+    confirmation: {
+      not_confirmed: {
+        variant: "secondary",
+        icon: Clock,
+        label: "Pending",
+      },
+      confirmed: {
+        variant: "default",
+        icon: CheckCircle,
+        label: "Confirmed",
+      },
+    },
+  };
+
+  const defaultConfig: StatusConfig = {
+    variant: "outline",
+    icon: AlertCircle,
+    label: status,
+  };
+
+  const config = statusConfig[type][status] || defaultConfig;
+  const Icon = config.icon;
+
+  return (
+    <Badge variant={config.variant} className="flex items-center gap-1">
+      <Icon className="h-3 w-3" />
+      {config.label}
+    </Badge>
+  );
+};
+
 function OrderHistoryContent() {
   const { offset = 0 } = useSearch({ from: "/_account/order-history" });
-
-  const { data }: { data: ShopperCustomersTypes.CustomerOrderResult } =
-    useSuspenseQuery(
-      getCustomerOrdersQueryOptions({ offset, limit: REQUESTED_LIMIT }),
-    );
-
   const navigate = useNavigate({ from: "/order-history" });
 
-  const [selectedOrder, setSelectedOrder] =
-    useState<ShopperCustomersTypes.Order | null>(null);
+  const { data } = useSuspenseQuery(
+    getCustomerOrdersQueryOptions({ offset, limit: REQUESTED_LIMIT }),
+  );
 
   const orders = data?.data || [];
   const totalOrders = data?.total || 0;
 
-  type StatusConfig = {
-    variant: "default" | "secondary" | "destructive" | "outline";
-    icon: React.ElementType;
-    label: string;
-  };
-
-  type StatusConfigMap = {
-    [key: string]: StatusConfig;
-  };
-
-  type StatusTypeMap = {
-    order: StatusConfigMap;
-    payment: StatusConfigMap;
-    shipping: StatusConfigMap;
-    confirmation: StatusConfigMap;
-  };
-
-  const getStatusBadge = (
-    status: string,
-    type: "order" | "payment" | "shipping" | "confirmation",
-  ) => {
-    const statusConfig: StatusTypeMap = {
-      order: {
-        created: {
-          variant: "secondary",
-          icon: Clock,
-          label: "Created",
-        },
-        confirmed: {
-          variant: "default",
-          icon: CheckCircle,
-          label: "Confirmed",
-        },
-        cancelled: {
-          variant: "destructive",
-          icon: XCircle,
-          label: "Cancelled",
-        },
-        completed: {
-          variant: "default",
-          icon: CheckCircle,
-          label: "Completed",
-        },
-      },
-      payment: {
-        not_paid: {
-          variant: "destructive",
-          icon: AlertCircle,
-          label: "Not Paid",
-        },
-        paid: { variant: "default", icon: CheckCircle, label: "Paid" },
-        partially_paid: {
-          variant: "secondary",
-          icon: Clock,
-          label: "Partially Paid",
-        },
-      },
-      shipping: {
-        not_shipped: {
-          variant: "secondary",
-          icon: Package,
-          label: "Not Shipped",
-        },
-        shipped: { variant: "default", icon: Truck, label: "Shipped" },
-        delivered: {
-          variant: "default",
-          icon: CheckCircle,
-          label: "Delivered",
-        },
-      },
-      confirmation: {
-        not_confirmed: {
-          variant: "secondary",
-          icon: Clock,
-          label: "Pending",
-        },
-        confirmed: {
-          variant: "default",
-          icon: CheckCircle,
-          label: "Confirmed",
-        },
-      },
-    };
-
-    const defaultConfig: StatusConfig = {
-      variant: "outline",
-      icon: AlertCircle,
-      label: status,
-    };
-
-    const config = statusConfig[type][status] || defaultConfig;
-    const Icon = config.icon;
-
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.label}
-      </Badge>
-    );
-  };
-
-  const formatCurrency = (amount?: number, currency = "USD") => {
-    if (!amount) return "$0.00";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  };
-
-  const formatAddress = (address?: ShopperCustomersTypes.OrderAddress) => {
-    if (!address) return "No address";
-    const parts = [
-      address.address1,
-      address.city && address.stateCode
-        ? `${address.city}, ${address.stateCode}`
-        : address.city || address.stateCode,
-      address.postalCode,
-    ].filter(Boolean);
-    return parts.join(", ");
-  };
-
   if (orders.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <ShoppingBag className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+            <ShoppingBag className="text-primary h-5 w-5" />
           </div>
           <div>
             <h1 className="text-3xl font-bold">Order History</h1>
@@ -214,10 +173,10 @@ function OrderHistoryContent() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <ShoppingBag className="h-5 w-5 text-primary" />
+          <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+            <ShoppingBag className="text-primary h-5 w-5" />
           </div>
           <div>
             <h1 className="text-3xl font-bold">Order History</h1>
@@ -232,37 +191,29 @@ function OrderHistoryContent() {
         {orders.map((order) => (
           <Card key={order.orderNo} className="overflow-hidden py-0">
             <CardHeader className="bg-muted/50 py-4">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    Order #{order.orderNo}
-                    {getStatusBadge(order.status, "order")}
-                  </CardTitle>
-                  <div className="text-muted-foreground flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {order.creationDate
-                        ? format(new Date(order.creationDate), "MMM dd, yyyy")
-                        : "Unknown date"}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      {formatCurrency(order.orderTotal, order.currency)}
-                    </div>
-                  </div>
-                </div>
+              <CardTitle className="flex items-center gap-2">
+                Order #{order.orderNo}
+                {getStatusBadge(order.status, "order")}
+              </CardTitle>
 
-                <div className="flex flex-wrap gap-2">
-                  {getStatusBadge(order.paymentStatus, "payment")}
-                  {getStatusBadge(order.shippingStatus, "shipping")}
-                  {getStatusBadge(order.confirmationStatus, "confirmation")}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {order.creationDate
+                    ? format(new Date(order.creationDate), "MMM dd, yyyy")
+                    : "Unknown date"}
+                </Badge>
+                <Badge className="flex items-center gap-1">
+                  {formatCurrency(order.orderTotal, order.currency)}
+                </Badge>
+                {getStatusBadge(order.paymentStatus, "payment")}
+                {getStatusBadge(order.shippingStatus, "shipping")}
+                {getStatusBadge(order.confirmationStatus, "confirmation")}
               </div>
             </CardHeader>
 
             <CardContent className="p-6">
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Order Items */}
                 <div className="space-y-4 lg:col-span-2">
                   <h3 className="flex items-center gap-2 font-semibold">
                     <Package className="h-4 w-4" />
@@ -298,11 +249,8 @@ function OrderHistoryContent() {
                     )}
                   </div>
                 </div>
-
-                {/* Order Summary */}
                 <div className="space-y-4">
                   <h3 className="font-semibold">Order Summary</h3>
-
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
@@ -310,19 +258,23 @@ function OrderHistoryContent() {
                         {formatCurrency(order.productSubTotal, order.currency)}
                       </span>
                     </div>
+
                     <div className="flex justify-between">
                       <span>Shipping:</span>
                       <span>
                         {formatCurrency(order.shippingTotal, order.currency)}
                       </span>
                     </div>
+
                     <div className="flex justify-between">
                       <span>Tax:</span>
                       <span>
                         {formatCurrency(order.taxTotal, order.currency)}
                       </span>
                     </div>
+
                     <Separator />
+
                     <div className="flex justify-between font-semibold">
                       <span>Total:</span>
                       <span>
@@ -342,7 +294,25 @@ function OrderHistoryContent() {
                         {order.shipments[0].shippingAddress.fullName}
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        {formatAddress(order.shipments[0].shippingAddress)}
+                        {formatAddress(
+                          order.shipments[0].shippingAddress as Address,
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Shipping Address */}
+                  {order.billingAddress && (
+                    <div className="border-t pt-4">
+                      <h4 className="mb-2 flex items-center gap-1 text-sm font-medium">
+                        <DollarSign className="h-3 w-3" />
+                        Billing Address
+                      </h4>
+                      <p className="text-muted-foreground text-xs">
+                        {order.billingAddress.fullName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {formatAddress(order.billingAddress as Address)}
                       </p>
                     </div>
                   )}
@@ -403,7 +373,7 @@ function OrderHistoryContent() {
       <CommercePagination
         total={data.total}
         offset={data.offset}
-        requestedLimit={1}
+        requestedLimit={REQUESTED_LIMIT}
         navigate={navigate}
       />
     </div>
@@ -412,8 +382,27 @@ function OrderHistoryContent() {
 
 function RouteComponent() {
   return (
-    <Suspense fallback={<AccountPageSkeleton variant="list" cards={3} cardItems={3} />}>
+    <Suspense
+      fallback={<AccountPageSkeleton variant="list" cards={3} cardItems={3} />}
+    >
       <OrderHistoryContent />
     </Suspense>
   );
 }
+
+type StatusConfig = {
+  variant: "default" | "secondary" | "destructive" | "outline";
+  icon: React.ElementType;
+  label: string;
+};
+
+type StatusConfigMap = {
+  [key: string]: StatusConfig;
+};
+
+type StatusTypeMap = {
+  order: StatusConfigMap;
+  payment: StatusConfigMap;
+  shipping: StatusConfigMap;
+  confirmation: StatusConfigMap;
+};

@@ -1,13 +1,15 @@
 import { ProductListTypes } from "@/integrations/salesforce/enums";
 import {
-    getProductListQueryOptions,
-    useCreateProductListMutation,
+  getProductListQueryOptions,
+  useCreateProductListMutation,
 } from "@/integrations/salesforce/options/customer";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export const useWishList = () => {
-  const { data, isLoading, error } = useQuery(getProductListQueryOptions());
+  const { data, isLoading, error } = useSuspenseQuery(
+    getProductListQueryOptions(),
+  );
 
   const createProductList = useCreateProductListMutation();
 

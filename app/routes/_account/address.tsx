@@ -33,13 +33,15 @@ function AddressContent() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-          <MapPin className="h-5 w-5 text-primary" />
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+          <MapPin className="text-primary h-5 w-5" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">My Addresses</h1>
-          <p className="text-muted-foreground">Manage your shipping addresses</p>
+          <p className="text-muted-foreground">
+            Manage your shipping addresses
+          </p>
         </div>
       </div>
 

@@ -48,11 +48,6 @@ export function AddressManagement({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl">Addresses</h1>
-        <p>Manage your saved addresses for faster checkout</p>
-      </div>
-
       {customer.addresses && customer.addresses.length > 0 ? (
         <>
           {customer.addresses?.map((address) => (
