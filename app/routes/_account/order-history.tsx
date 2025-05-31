@@ -1,3 +1,10 @@
+import { AccountPageSkeleton } from "@/components/commerce/account/account-page-skeleton";
+import { CommercePagination } from "@/components/commerce/commerce-pagination";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { getCustomerOrdersQueryOptions } from "@/integrations/salesforce/options/customer";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -23,14 +30,7 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
-
-import { CommercePagination } from "@/components/commerce/commerce-pagination";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
+import { Suspense, useState } from "react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_account/order-history")({
@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_account/order-history")({
   },
 });
 
-function RouteComponent() {
+function OrderHistoryContent() {
   const { offset = 0 } = useSearch({ from: "/_account/order-history" });
 
   const { data }: { data: ShopperCustomersTypes.CustomerOrderResult } =
@@ -63,81 +63,97 @@ function RouteComponent() {
   const orders = data?.data || [];
   const totalOrders = data?.total || 0;
 
+  type StatusConfig = {
+    variant: "default" | "secondary" | "destructive" | "outline";
+    icon: React.ElementType;
+    label: string;
+  };
+
+  type StatusConfigMap = {
+    [key: string]: StatusConfig;
+  };
+
+  type StatusTypeMap = {
+    order: StatusConfigMap;
+    payment: StatusConfigMap;
+    shipping: StatusConfigMap;
+    confirmation: StatusConfigMap;
+  };
+
   const getStatusBadge = (
     status: string,
     type: "order" | "payment" | "shipping" | "confirmation",
   ) => {
-    const statusConfig = {
+    const statusConfig: StatusTypeMap = {
       order: {
         created: {
-          variant: "secondary" as const,
+          variant: "secondary",
           icon: Clock,
           label: "Created",
         },
         confirmed: {
-          variant: "default" as const,
+          variant: "default",
           icon: CheckCircle,
           label: "Confirmed",
         },
         cancelled: {
-          variant: "destructive" as const,
+          variant: "destructive",
           icon: XCircle,
           label: "Cancelled",
         },
         completed: {
-          variant: "default" as const,
+          variant: "default",
           icon: CheckCircle,
           label: "Completed",
         },
       },
       payment: {
         not_paid: {
-          variant: "destructive" as const,
+          variant: "destructive",
           icon: AlertCircle,
           label: "Not Paid",
         },
-        paid: { variant: "default" as const, icon: CheckCircle, label: "Paid" },
+        paid: { variant: "default", icon: CheckCircle, label: "Paid" },
         partially_paid: {
-          variant: "secondary" as const,
+          variant: "secondary",
           icon: Clock,
           label: "Partially Paid",
         },
       },
       shipping: {
         not_shipped: {
-          variant: "secondary" as const,
+          variant: "secondary",
           icon: Package,
           label: "Not Shipped",
         },
-        shipped: { variant: "default" as const, icon: Truck, label: "Shipped" },
+        shipped: { variant: "default", icon: Truck, label: "Shipped" },
         delivered: {
-          variant: "default" as const,
+          variant: "default",
           icon: CheckCircle,
           label: "Delivered",
         },
       },
       confirmation: {
         not_confirmed: {
-          variant: "secondary" as const,
+          variant: "secondary",
           icon: Clock,
           label: "Pending",
         },
         confirmed: {
-          variant: "default" as const,
+          variant: "default",
           icon: CheckCircle,
           label: "Confirmed",
         },
       },
     };
 
-    const config = statusConfig[type][
-      status as keyof (typeof statusConfig)[typeof type]
-    ] || {
-      variant: "outline" as const,
+    const defaultConfig: StatusConfig = {
+      variant: "outline",
       icon: AlertCircle,
       label: status,
     };
 
+    const config = statusConfig[type][status] || defaultConfig;
     const Icon = config.icon;
 
     return (
@@ -170,32 +186,39 @@ function RouteComponent() {
 
   if (orders.length === 0) {
     return (
-      <>
+      <div className="space-y-6">
         <div className="mb-8 flex items-center gap-3">
-          <ShoppingBag className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Order History</h1>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Order History</h1>
+            <p className="text-muted-foreground">View your past orders</p>
+          </div>
         </div>
 
-        <Card className="py-12 text-center">
-          <CardContent>
-            <ShoppingBag className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
+        <Card className="overflow-hidden">
+          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+            <ShoppingBag className="text-muted-foreground mb-4 h-16 w-16" />
             <h2 className="mb-2 text-2xl font-semibold">No orders found</h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-6 max-w-md">
               You haven't placed any orders yet. Start shopping to see your
               order history here.
             </p>
             <Button size="lg">Start Shopping</Button>
           </CardContent>
         </Card>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="space-y-6">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <ShoppingBag className="h-8 w-8 text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+          </div>
           <div>
             <h1 className="text-3xl font-bold">Order History</h1>
             <p className="text-muted-foreground">
@@ -383,6 +406,14 @@ function RouteComponent() {
         requestedLimit={1}
         navigate={navigate}
       />
-    </>
+    </div>
+  );
+}
+
+function RouteComponent() {
+  return (
+    <Suspense fallback={<AccountPageSkeleton variant="list" cards={3} cardItems={3} />}>
+      <OrderHistoryContent />
+    </Suspense>
   );
 }

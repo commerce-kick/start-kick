@@ -76,7 +76,6 @@ export const customerProductLists = createServerFn({ method: "GET" }).handler(
   async () => {
     const { data } = await useAppSession();
     const { api } = await getSalesforceAPI();
-
     const shopperCustomers = await api.shopperCustomers();
 
     return await shopperCustomers.getCustomerProductLists({
