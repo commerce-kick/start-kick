@@ -1,7 +1,6 @@
 import Price from "@/components/commerce/price";
 import { ProductImageGallery } from "@/components/commerce/product-image-gallery";
 import { ProductVariations } from "@/components/commerce/product-variations";
-import Rating from "@/components/commerce/rating";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -12,7 +11,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -20,7 +19,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,9 +46,8 @@ import {
   RotateCcw,
   Shield,
   ShoppingBag,
-  Star,
   Truck,
-  Zap,
+  Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -201,7 +198,6 @@ const ProductInBundleCard = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <Rating rating={product.averageRating || 0} size="sm" />
           <span className="text-muted-foreground text-xs">
             ({product.reviews?.length || 0})
           </span>
@@ -508,24 +504,6 @@ function RouteComponent() {
                 </div>
               </div>
 
-              {/* Rating and Reviews */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Rating rating={product.averageRating || 0} />
-                  <span className="text-muted-foreground text-sm">
-                    ({product.reviews?.length || 0}{" "}
-                    {product.reviews?.length === 1 ? "review" : "reviews"})
-                  </span>
-                </div>
-                <Separator orientation="vertical" className="h-4" />
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">SKU:</span>
-                  <code className="bg-muted rounded px-2 py-1 text-sm">
-                    {selectedVariant?.productId || product.id}
-                  </code>
-                </div>
-              </div>
-
               {/* Price */}
               <div className="space-y-2">
                 <Price
@@ -536,7 +514,7 @@ function RouteComponent() {
                   promotion={promotion}
                   className="text-2xl"
                 />
-                {promotion  && (
+                {promotion && (
                   <div className="flex items-center gap-2">
                     <Badge variant="destructive" className="text-xs">
                       Save{" "}
@@ -718,13 +696,10 @@ function RouteComponent() {
         {/* Product Information Tabs */}
         <div className="mt-16">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="reviews">
-                Reviews{" "}
-                {product.reviews?.length ? `(${product.reviews.length})` : ""}
-              </TabsTrigger>
+
               <TabsTrigger value="shipping">Shipping</TabsTrigger>
             </TabsList>
 
@@ -803,128 +778,6 @@ function RouteComponent() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="reviews" className="mt-6">
-              <div className="space-y-6">
-                {/* Review Summary */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Customer Reviews</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {product.reviews && product.reviews.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4">
-                            <div className="text-4xl font-bold">
-                              {product.averageRating || "N/A"}
-                            </div>
-                            <div>
-                              <Rating rating={product.averageRating || 0} />
-                              <p className="text-muted-foreground text-sm">
-                                Based on {product.reviews.length}{" "}
-                                {product.reviews.length === 1
-                                  ? "review"
-                                  : "reviews"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          {[5, 4, 3, 2, 1].map((stars) => {
-                            const count =
-                              product.reviews?.filter(
-                                (review) => Math.floor(review.rating) === stars,
-                              ).length || 0;
-                            const percentage = product.reviews?.length
-                              ? (count / product.reviews.length) * 100
-                              : 0;
-                            return (
-                              <div
-                                key={stars}
-                                className="flex items-center gap-2"
-                              >
-                                <span className="w-8 text-sm">{stars}</span>
-                                <Star className="h-3 w-3 fill-current" />
-                                <Progress
-                                  value={percentage}
-                                  className="flex-1"
-                                />
-                                <span className="text-muted-foreground w-8 text-sm">
-                                  {count}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="py-8 text-center">
-                        <p className="text-muted-foreground">
-                          No reviews available for this product yet.
-                        </p>
-                        <p className="text-muted-foreground mt-2 text-sm">
-                          Be the first to leave a review!
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Individual Reviews */}
-                {product.reviews && product.reviews.length > 0 && (
-                  <div className="space-y-4">
-                    {product.reviews.slice(0, 5).map((review, i) => (
-                      <Card key={review.id || i}>
-                        <CardContent className="p-6">
-                          <div className="space-y-4">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <Rating rating={review.rating} />
-                                  <span className="font-medium">
-                                    {review.customerName || "Anonymous"}
-                                  </span>
-                                </div>
-                                <p className="text-muted-foreground text-sm">
-                                  {review.verified && "Verified Purchase • "}
-                                  {review.createdAt
-                                    ? new Date(
-                                        review.createdAt,
-                                      ).toLocaleDateString()
-                                    : "Recent"}
-                                </p>
-                              </div>
-                              {review.verified && (
-                                <Badge variant="outline">Verified</Badge>
-                              )}
-                            </div>
-                            <div>
-                              {review.title && (
-                                <h4 className="mb-2 font-medium">
-                                  {review.title}
-                                </h4>
-                              )}
-                              <p className="text-muted-foreground text-sm">
-                                {review.comment}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-
-                    {product.reviews.length > 5 && (
-                      <div className="text-center">
-                        <Button variant="outline">
-                          View all {product.reviews.length} reviews
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
             </TabsContent>
 
             <TabsContent value="shipping" className="mt-6">
