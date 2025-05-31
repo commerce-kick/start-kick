@@ -18,7 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { getProductsQueryOptions } from "@/integrations/salesforce/options/products";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
   Link,
@@ -26,7 +26,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { Filter, Grid3X3, List, SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { CommercePagination } from "@/components/commerce/commerce-pagination";
 import ProductCard from "@/components/commerce/product-card";
@@ -276,7 +276,7 @@ function FiltersSkeleton() {
   );
 }
 
-function RouteComponent() {
+function CategoryComponent() {
   const {
     offset = 0,
     sort,
@@ -301,7 +301,7 @@ function RouteComponent() {
     }
   });
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading, isError } = useSuspenseQuery(
     getProductsQueryOptions({
       refine: refineArray,
       limit: REQUESTED_LIMIT,
@@ -452,20 +452,16 @@ function RouteComponent() {
                 </SheetTitle>
               </SheetHeader>
               <div className="h-full overflow-y-auto p-4">
-                {isLoading || !data ? (
-                  <FiltersSkeleton />
-                ) : (
-                  <FiltersContent
-                    refinements={data.refinements}
-                    productSorts={data.sortingOptions}
-                    cgid={categoryId}
-                    selectedRefinements={refinements}
-                    selectedSort={sort}
-                    handleSelectedRefinement={handleSelectedRefinement}
-                    handleOnSortChange={handleOnSortChange}
-                    handleClearFilters={handleClearFilters}
-                  />
-                )}
+                <FiltersContent
+                  refinements={data.refinements}
+                  productSorts={data.sortingOptions}
+                  cgid={categoryId}
+                  selectedRefinements={refinements}
+                  selectedSort={sort}
+                  handleSelectedRefinement={handleSelectedRefinement}
+                  handleOnSortChange={handleOnSortChange}
+                  handleClearFilters={handleClearFilters}
+                />
               </div>
             </SheetContent>
           </Sheet>
@@ -503,25 +499,7 @@ function RouteComponent() {
 
         {/* Products Grid */}
         <div className="space-y-6 lg:col-span-3">
-          {isLoading ? (
-            <>
-              <ProductGridSkeleton viewMode={viewMode} />
-              <div className="space-y-4">
-                <div className="text-center">
-                  <Skeleton className="mx-auto h-4 w-48" />
-                </div>
-                <div className="flex justify-center">
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-10 w-20" />
-                    <Skeleton className="h-10 w-10" />
-                    <Skeleton className="h-10 w-10" />
-                    <Skeleton className="h-10 w-10" />
-                    <Skeleton className="h-10 w-20" />
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : data && data.total > 0 ? (
+          {data && data.total > 0 ? (
             <>
               <div
                 className={cn(
@@ -571,5 +549,64 @@ function RouteComponent() {
         </div>
       </div>
     </div>
+  );
+}
+
+function CategoryPageSkeleton() {
+  return (
+    <div className="container mx-auto space-y-6 py-8">
+      {/* Header Skeleton */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Skeleton className="h-8 w-32" /> {/* Title */}
+          <Skeleton className="mt-2 h-4 w-24" /> {/* Results count */}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* View Mode Toggle Skeleton */}
+          <div className="hidden rounded-md border sm:flex">
+            <Skeleton className="h-9 w-9" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+
+          {/* Mobile Filter Button Skeleton */}
+          <Skeleton className="h-9 w-24 md:hidden" />
+        </div>
+      </div>
+
+      {/* Main Content Skeleton */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+        {/* Desktop Filters Sidebar Skeleton */}
+        <div className="hidden space-y-6 lg:block">
+          <div className="sticky top-4">
+            <div className="mb-4 flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-5 w-16" />
+            </div>
+            <FiltersSkeleton />
+          </div>
+        </div>
+
+        {/* Products Grid Skeleton */}
+        <div className="space-y-6 lg:col-span-3">
+          <ProductGridSkeleton viewMode="grid" />
+          
+          {/* Pagination Skeleton */}
+          <div className="flex items-center justify-center space-x-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-10 rounded-md" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RouteComponent() {
+  return (
+    <Suspense fallback={<CategoryPageSkeleton />}>
+      <CategoryComponent />
+    </Suspense>
   );
 }
