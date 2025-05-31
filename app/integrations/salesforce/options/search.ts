@@ -1,5 +1,5 @@
 import { getSearchSuggestions } from "@/integrations/salesforce/server/search";
-import { SearchSuggestionsParams } from "@/integrations/salesforce/types";
+import { SearchSuggestionsParams } from "@/integrations/salesforce/types/params";
 import { queryOptions } from "@tanstack/react-query";
 
 export const getSearchSuggestionsOptions = (

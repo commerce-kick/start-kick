@@ -2,9 +2,10 @@ import { getSalesforceAPI } from "@/integrations/salesforce/server/config";
 import {
   AddItemToBasketParams,
   AddPaymentInstrumentToBasketParams,
+  UpdateBillingAddressForBasketParams,
   UpdateShippingAddressForShipmentParams,
   UpdateShippingMethodParams,
-} from "@/integrations/salesforce/types";
+} from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
 
 export const addItemToNewOrExistingBasket = createServerFn({ method: "POST" })
@@ -155,6 +156,20 @@ export const updateShippingAddressForShipment = createServerFn({
     const shopperBasket = await api.shopperBaskets();
 
     return await shopperBasket.updateShippingAddressForShipment({
+      parameters: data.params,
+      body: data.body,
+    });
+  });
+
+export const updateBillingAddressForBasket = createServerFn({
+  method: "POST",
+})
+  .validator((data: UpdateBillingAddressForBasketParams) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const shopperBasket = await api.shopperBaskets();
+
+    return await shopperBasket.updateBillingAddressForBasket({
       parameters: data.params,
       body: data.body,
     });

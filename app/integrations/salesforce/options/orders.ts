@@ -1,8 +1,15 @@
 import { getBasketQueryOptions } from "@/integrations/salesforce/options/basket";
-import { createOrder } from "@/integrations/salesforce/server/orders";
-import { CreateOrderParams } from "@/integrations/salesforce/types";
-import { useMutation } from "@tanstack/react-query";
+import { createOrder, getOrder } from "@/integrations/salesforce/server/orders";
+import { CreateOrderParams } from "@/integrations/salesforce/types/params";
+import { queryOptions, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+
+export const getOrderQueryOptions = (params: { orderNo: string }) => {
+  return queryOptions({
+    queryKey: ["orders", { ...params }],
+    queryFn: async () => getOrder({ data: params }),
+  });
+};
 
 export const useCreateOrderMutation = () => {
   const navigate = useNavigate();

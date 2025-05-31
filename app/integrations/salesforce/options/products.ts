@@ -9,7 +9,7 @@ import type {
   GetProductParams,
   GetProductsByIdsParams,
   ProductSearchParams,
-} from "@/integrations/salesforce/types";
+} from "@/integrations/salesforce/types/params";
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import {

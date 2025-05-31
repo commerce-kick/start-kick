@@ -1,6 +1,5 @@
 import Price from "@/components/commerce/price";
 import { ProductImageGallery } from "@/components/commerce/product-image-gallery";
-import { ProductRecommendations } from "@/components/commerce/product-recommendations";
 import { ProductVariations } from "@/components/commerce/product-variations";
 import Rating from "@/components/commerce/rating";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +13,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +35,10 @@ import { getProductQueryOptions } from "@/integrations/salesforce/options/produc
 import { cn } from "@/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ShopperBasketsTypes } from "commerce-sdk-isomorphic";
+import type {
+  ShopperBasketsTypes,
+  ShopperProductsTypes,
+} from "commerce-sdk-isomorphic";
 import {
   AlertCircle,
   CheckCircle,
@@ -45,41 +54,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-
-interface ShareModalProps {
-  productName: string;
-  productUrl: string;
-}
-
-// Helper function to get default selections for variation attributes
-function getDefaultSelections(variationAttributes: any[], variants: any[]) {
-  const defaultSelections: Record<string, string> = {};
-
-  variationAttributes?.forEach((attr) => {
-    if (attr.values && attr.values.length > 0) {
-      // Filter orderable values
-      const orderableValues = attr.values.filter((value: any) => {
-        // Check if any variant with this value is orderable
-        return variants?.some(
-          (variant) =>
-            variant.variationValues?.[attr.id] === value.value &&
-            variant.orderable !== false,
-        );
-      });
-
-      // If only one orderable option, auto-select it
-      if (orderableValues.length === 1) {
-        defaultSelections[attr.id] = orderableValues[0].value;
-      }
-      // If multiple options, select the first orderable one as default
-      else if (orderableValues.length > 1) {
-        defaultSelections[attr.id] = orderableValues[0].value;
-      }
-    }
-  });
-
-  return defaultSelections;
-}
 
 export const Route = createFileRoute("/products/$productId")({
   component: RouteComponent,
@@ -113,6 +87,36 @@ export const Route = createFileRoute("/products/$productId")({
     );
   },
 });
+
+// Helper function to get default selections for variation attributes
+function getDefaultSelections(variationAttributes: any[], variants: any[]) {
+  const defaultSelections: Record<string, string> = {};
+
+  variationAttributes?.forEach((attr) => {
+    if (attr.values && attr.values.length > 0) {
+      // Filter orderable values
+      const orderableValues = attr.values.filter((value: any) => {
+        // Check if any variant with this value is orderable
+        return variants?.some(
+          (variant) =>
+            variant.variationValues?.[attr.id] === value.value &&
+            variant.orderable !== false,
+        );
+      });
+
+      // If only one orderable option, auto-select it
+      if (orderableValues.length === 1) {
+        defaultSelections[attr.id] = orderableValues[0].value;
+      }
+      // If multiple options, select the first orderable one as default
+      else if (orderableValues.length > 1) {
+        defaultSelections[attr.id] = orderableValues[0].value;
+      }
+    }
+  });
+
+  return defaultSelections;
+}
 
 function ProductSkeleton() {
   return (
@@ -154,9 +158,98 @@ function ProductSkeleton() {
   );
 }
 
-type RouteComponentProps = {};
+const ProductInBundleCard = ({
+  product,
+}: {
+  product: ShopperProductsTypes.Product;
+}) => {
+  const primaryImage = product.imageGroups?.find(
+    (group) => group.viewType === "large",
+  )?.images?.[0];
 
-function RouteComponent({}: RouteComponentProps) {
+  return (
+    <Card className="h-full overflow-hidden py-0 transition-all hover:shadow-lg">
+      <div className="relative aspect-square overflow-hidden">
+        {primaryImage ? (
+          <img
+            src={primaryImage.link || "/placeholder.svg"}
+            alt={primaryImage.alt || product.name}
+            className="h-full w-full object-cover transition-transform hover:scale-105"
+          />
+        ) : (
+          <div className="bg-muted flex h-full w-full items-center justify-center">
+            <span className="text-muted-foreground text-sm">No Image</span>
+          </div>
+        )}
+        {product.productPromotions?.[0] && (
+          <Badge className="absolute top-2 left-2" variant="destructive">
+            <Zap className="mr-1 h-3 w-3" />
+            Sale
+          </Badge>
+        )}
+      </div>
+      <CardContent className="space-y-3 p-4">
+        <div className="space-y-2">
+          {product.brand && (
+            <Badge variant="outline" className="text-xs">
+              {product.brand}
+            </Badge>
+          )}
+          <h3 className="line-clamp-2 text-sm leading-tight font-semibold">
+            {product.name}
+          </h3>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Rating rating={product.averageRating || 0} size="sm" />
+          <span className="text-muted-foreground text-xs">
+            ({product.reviews?.length || 0})
+          </span>
+        </div>
+
+        <div className="space-y-1">
+          <Price
+            price={product.price}
+            currency={product.currency}
+            priceMax={product.priceMax}
+            promotion={product.productPromotions?.[0]}
+            className="text-lg font-bold"
+          />
+          {product.shortDescription && (
+            <p className="text-muted-foreground line-clamp-2 text-xs">
+              {product.shortDescription}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-1">
+            {product.inventory?.stockLevel !== 0 ? (
+              <>
+                <CheckCircle className="h-3 w-3 text-green-600" />
+                <span className="text-xs font-medium text-green-600">
+                  In Stock
+                </span>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="h-3 w-3 text-red-600" />
+                <span className="text-xs font-medium text-red-600">
+                  Out of Stock
+                </span>
+              </>
+            )}
+          </div>
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+            View Details
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+function RouteComponent() {
   const { productId } = Route.useParams();
   const { pid, variations: urlVariations } = Route.useSearch();
   const navigate = useNavigate({ from: "/products/$productId" });
@@ -245,7 +338,6 @@ function RouteComponent({}: RouteComponentProps) {
   const stockLevel =
     selectedVariant?.inventory?.stockLevel || product.inventory?.stockLevel;
   const promotion = product.productPromotions?.[0];
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   // Calculate stock status
   const getStockStatus = () => {
@@ -610,6 +702,21 @@ function RouteComponent({}: RouteComponentProps) {
           </div>
         </div>
 
+        {/* Shop Products */}
+        <section className="py-12 md:py-16">
+          <Carousel className="mx-auto">
+            <CarouselContent>
+              {product.bundledProducts?.map(({ product }, index) => (
+                <CarouselItem key={`product-${index}`} className="md:basis-1/4">
+                  <ProductInBundleCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
+          </Carousel>
+        </section>
+
         {/* Product Information Tabs */}
         <div className="mt-16">
           <Tabs defaultValue="description" className="w-full">
@@ -886,16 +993,6 @@ function RouteComponent({}: RouteComponentProps) {
             </TabsContent>
           </Tabs>
         </div>
-
-        {/* Recommendations */}
-        {product.recommendations && (
-          <div className="mt-16">
-            <ProductRecommendations
-              recommendations={product.recommendations}
-              currency={product.currency}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

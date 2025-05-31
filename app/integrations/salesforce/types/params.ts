@@ -1,3 +1,4 @@
+import { Address } from "@/integrations/salesforce/types/api";
 import { ShopperBasketsTypes } from "commerce-sdk-isomorphic";
 
 export interface SalesforceConfig {
@@ -80,12 +81,22 @@ export interface UpdateShippingAddressForShipmentParams {
   body: ShopperBasketsTypes.OrderAddress;
 }
 
+export interface UpdateBillingAddressForBasketParams {
+  params: {
+    basketId: string;
+    shipmentId: string;
+    useAsBilling?: boolean;
+    removeExternalTax?: boolean;
+  };
+  body: ShopperBasketsTypes.OrderAddress;
+}
+
 export interface UpdateShippingMethodParams {
   params: {
     basketId: string;
     shipmentId: string;
   };
-  body: ShopperBasketsTypes.Shipment;
+  body: ShopperBasketsTypes.ShippingMethod;
 }
 
 export interface UpdateShippingMethodForShipmentParams {
@@ -113,4 +124,15 @@ export interface SearchSuggestionsParams {
   limit?: number;
   currency?: string;
   locale?: string;
+}
+
+export interface CreateCustomerAddressParams {
+  params?: {};
+  body: Address;
+}
+
+export interface AddressCallback {
+  address: Address;
+  saveAddress?: boolean;
+  setAsDefault?: boolean;
 }

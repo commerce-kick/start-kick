@@ -6,18 +6,20 @@ import { CustomerInfo } from "@/components/commerce/checkout/customer-info";
 import { OrderSummary } from "@/components/commerce/checkout/order-summary";
 import { Payment } from "@/components/commerce/checkout/payment";
 import { Review } from "@/components/commerce/checkout/review";
-import { ShippingAddress } from "@/components/commerce/checkout/shipping-address";
+import { ShippingAddressWithSelector } from "@/components/commerce/checkout/shipping-address-with-selector";
 import { ShippingOptions } from "@/components/commerce/checkout/shipping-options";
 import {
   getBasketQueryOptions,
   useAddPaymentInstrumentToBasketMutation,
   useDeleteBasketMutation,
+  useUpdateBillingAddressForBasketMutation,
   useUpdateCustomerForBasketMutation,
   useUpdateShippingAddressForShipmentMutation,
   useUpdateShippingMethodForShipmentMutation,
 } from "@/integrations/salesforce/options/basket";
 import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
 import { useCreateOrderMutation } from "@/integrations/salesforce/options/orders";
+import { Address } from "@/integrations/salesforce/types/api";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/checkout")({
@@ -38,6 +40,10 @@ function RouteComponent() {
   const updateCustomerForBasketMutation = useUpdateCustomerForBasketMutation();
   const updateShippingAddressForShipmentMutation =
     useUpdateShippingAddressForShipmentMutation();
+
+  const updateBillingAddressForBasketMutation =
+    useUpdateBillingAddressForBasketMutation();
+
   const updateShippingMethodForShipmentMutation =
     useUpdateShippingMethodForShipmentMutation();
   const addPaymentInstrumentToBasketMutation =
@@ -81,7 +87,13 @@ function RouteComponent() {
     handleNext();
   };
 
-  const handleShippingAddress = async (data: any) => {
+  const handleShippingAddress = async (data: {
+    shippingAddress: Address;
+    useSameAsBilling: boolean;
+    billingAddress?: Address;
+    saveAddress?: boolean;
+    setAsDefault?: boolean;
+  }) => {
     if (!basket?.basketId) return;
 
     await updateShippingAddressForShipmentMutation.mutateAsync({
@@ -102,6 +114,27 @@ function RouteComponent() {
         stateCode: data.shippingAddress.state,
       },
     });
+
+    if (!data.useSameAsBilling && data.billingAddress) {
+      await updateBillingAddressForBasketMutation.mutateAsync({
+        params: {
+          basketId: basket.basketId,
+          shipmentId: "me",
+        },
+        body: {
+          address1: data.billingAddress.address1,
+          address2: data.billingAddress.address2,
+          city: data.billingAddress.city,
+          countryCode: data.billingAddress.country,
+          firstName: data.billingAddress.firstName,
+          lastName: data.billingAddress.lastName,
+          phone: data.billingAddress.phone,
+          postalCode: data.billingAddress.postalCode,
+          stateCode: data.billingAddress.state,
+        },
+      });
+    }
+
     handleNext();
   };
 
@@ -122,9 +155,6 @@ function RouteComponent() {
 
   const handlePayment = async (data: any) => {
     if (!basket?.basketId) return;
-
-
-    console.log(data)
 
     await addPaymentInstrumentToBasketMutation.mutateAsync({
       params: {
@@ -220,35 +250,8 @@ function RouteComponent() {
           )}
 
           {activeStep === 1 && (
-            <ShippingAddress
-              defaultValues={{
-                firstName:
-                  shippingAddress?.firstName || customer?.firstName || "",
-                lastName: shippingAddress?.lastName || customer?.lastName || "",
-                phone: shippingAddress?.phone || customer?.phone || "",
-                address1: shippingAddress?.address1 || "",
-                address2: shippingAddress?.address2 || "",
-                city: shippingAddress?.city || "",
-                state: shippingAddress?.stateCode || "",
-                postalCode: shippingAddress?.postalCode || "",
-                country: shippingAddress?.countryCode || "US",
-              }}
-              billingValues={
-                billingAddress
-                  ? {
-                      firstName: billingAddress.firstName || "",
-                      lastName: billingAddress.lastName || "",
-                      phone: billingAddress.phone || "",
-                      address1: billingAddress.address1 || "",
-                      address2: billingAddress.address2 || "",
-                      city: billingAddress.city || "",
-                      state: billingAddress.stateCode || "",
-                      postalCode: billingAddress.postalCode || "",
-                      country: billingAddress.countryCode || "US",
-                    }
-                  : undefined
-              }
-              useSameAsBilling={hasSameAddress !== false}
+            <ShippingAddressWithSelector
+              customer={customer}
               onNext={handleShippingAddress}
               onBack={handlePrevious}
             />

@@ -1,17 +1,21 @@
 import { ProductListTypes } from "@/integrations/salesforce/enums";
 import {
   addItemToProductList,
+  createCustomerAdress,
   createProductList,
   customerProductLists,
   getCustomer,
   getCustomerOrders,
 } from "@/integrations/salesforce/server/customer";
-import { CustomerOrdersParams } from "@/integrations/salesforce/types";
+import { Customer } from "@/integrations/salesforce/types/api";
+import {
+  CreateCustomerAddressParams,
+  CustomerOrdersParams,
+} from "@/integrations/salesforce/types/params";
 import { queryOptions, useMutation } from "@tanstack/react-query";
-import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 
 export const getCustomerQueryOptions = () => {
-  return queryOptions<ShopperCustomersTypes.Customer>({
+  return queryOptions<Customer>({
     queryKey: ["customers"],
     queryFn: async () => getCustomer(),
   });
@@ -50,6 +54,17 @@ export const useAddItemToProductListMutation = () => {
     meta: {
       sucessMessage: "Done",
       invalidateQuery: getProductListQueryOptions().queryKey,
+    },
+  });
+};
+
+export const useCreateCustumerAddressMutation = () => {
+  return useMutation({
+    mutationFn: async (data: CreateCustomerAddressParams) =>
+      createCustomerAdress({ data }),
+    meta: {
+      sucessMessage: "New Address created",
+      invalidateQuery: getCustomerQueryOptions().queryKey,
     },
   });
 };

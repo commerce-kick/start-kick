@@ -2,6 +2,7 @@ import { getCustomerOrdersQueryOptions } from "@/integrations/salesforce/options
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
+  Link,
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
@@ -25,17 +26,9 @@ import {
 import { useState } from "react";
 
 import { CommercePagination } from "@/components/commerce/commerce-pagination";
-import OrderDetails from "@/components/commerce/order-details";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { z } from "zod";
@@ -355,26 +348,15 @@ function RouteComponent() {
 
               <div className="flex flex-col justify-between gap-3 sm:flex-row">
                 <div className="flex gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>
-                          Order #{order.orderNo} Details
-                        </DialogTitle>
-                      </DialogHeader>
-                      <OrderDetails order={order} />
-                    </DialogContent>
-                  </Dialog>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      to="/orders/$orderId"
+                      params={{ orderId: order.orderNo! }}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Details
+                    </Link>
+                  </Button>
 
                   <Button variant="outline" size="sm">
                     <Download className="mr-2 h-4 w-4" />
@@ -393,10 +375,6 @@ function RouteComponent() {
           </Card>
         ))}
       </div>
-      {JSON.stringify({
-        total: data.total,
-        offset: data.offset,
-      })}
 
       {/* Pagination */}
       <CommercePagination

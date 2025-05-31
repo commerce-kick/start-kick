@@ -1,5 +1,5 @@
 import { getSalesforceAPI } from "@/integrations/salesforce/server/config";
-import { SearchSuggestionsParams } from "@/integrations/salesforce/types";
+import { SearchSuggestionsParams } from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
 
 export const getSearchSuggestions = createServerFn({ method: "GET" })

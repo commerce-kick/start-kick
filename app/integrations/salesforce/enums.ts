@@ -6,3 +6,8 @@ export enum ProductListTypes {
   CUSTOM_2 = "custom_2",
   CUSTOM_3 = "custom_3",
 }
+
+
+export enum AuthTypes {
+  REGISTERED = "registered"
+}

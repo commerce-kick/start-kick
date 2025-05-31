@@ -1,4 +1,4 @@
-import { SalesforceSessionData } from "@/integrations/salesforce/types";
+import { SalesforceSessionData } from "@/integrations/salesforce/types/params";
 
 export class SalesforceSessionManager {
   private session: any;

@@ -21,6 +21,7 @@ import { Route as AccountWishlistImport } from './routes/_account/wishlist'
 import { Route as AccountOrderHistoryImport } from './routes/_account/order-history'
 import { Route as AccountAddressImport } from './routes/_account/address'
 import { Route as AccountAccountImport } from './routes/_account/account'
+import { Route as AccountOrdersOrderIdImport } from './routes/_account/orders/$orderId'
 
 // Create/Update Routes
 
@@ -80,6 +81,12 @@ const AccountAddressRoute = AccountAddressImport.update({
 const AccountAccountRoute = AccountAccountImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AccountRoute,
+} as any)
+
+const AccountOrdersOrderIdRoute = AccountOrdersOrderIdImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
   getParentRoute: () => AccountRoute,
 } as any)
 
@@ -157,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsProductIdImport
       parentRoute: typeof rootRoute
     }
+    '/_account/orders/$orderId': {
+      id: '/_account/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AccountOrdersOrderIdImport
+      parentRoute: typeof AccountImport
+    }
   }
 }
 
@@ -167,6 +181,7 @@ interface AccountRouteChildren {
   AccountAddressRoute: typeof AccountAddressRoute
   AccountOrderHistoryRoute: typeof AccountOrderHistoryRoute
   AccountWishlistRoute: typeof AccountWishlistRoute
+  AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
@@ -174,6 +189,7 @@ const AccountRouteChildren: AccountRouteChildren = {
   AccountAddressRoute: AccountAddressRoute,
   AccountOrderHistoryRoute: AccountOrderHistoryRoute,
   AccountWishlistRoute: AccountWishlistRoute,
+  AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
 }
 
 const AccountRouteWithChildren =
@@ -190,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -203,6 +220,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
 
 export interface FileRoutesById {
@@ -217,6 +235,7 @@ export interface FileRoutesById {
   '/_account/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/_account/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
 
 export interface FileRouteTypes {
@@ -232,6 +251,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
+    | '/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -244,6 +264,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
+    | '/orders/$orderId'
   id:
     | '__root__'
     | '/'
@@ -256,6 +277,7 @@ export interface FileRouteTypes {
     | '/_account/wishlist'
     | '/category/$categoryId'
     | '/products/$productId'
+    | '/_account/orders/$orderId'
   fileRoutesById: FileRoutesById
 }
 
@@ -304,7 +326,8 @@ export const routeTree = rootRoute
         "/_account/account",
         "/_account/address",
         "/_account/order-history",
-        "/_account/wishlist"
+        "/_account/wishlist",
+        "/_account/orders/$orderId"
       ]
     },
     "/checkout": {
@@ -334,6 +357,10 @@ export const routeTree = rootRoute
     },
     "/products/$productId": {
       "filePath": "products/$productId.tsx"
+    },
+    "/_account/orders/$orderId": {
+      "filePath": "_account/orders/$orderId.tsx",
+      "parent": "/_account"
     }
   }
 }

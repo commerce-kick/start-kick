@@ -3,7 +3,7 @@ import {
   GetProductParams,
   GetProductsByIdsParams,
   ProductSearchParams,
-} from "@/integrations/salesforce/types";
+} from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
 
 export const getProducts = createServerFn({ method: "GET" })

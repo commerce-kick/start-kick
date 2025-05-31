@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export const Route = createFileRoute("/login")({
@@ -387,6 +388,8 @@ function RouteComponent() {
     ),
   });
 
+  const [activeView, setActiveView] = useState("login");
+
   const registerForm = useForm({
     resolver: zodResolver(
       z.object({
@@ -429,6 +432,48 @@ function RouteComponent() {
               Your one-stop shop for everything
             </p>
           </div>
+
+          {/* Mobile Tabs - Only visible on small screens */}
+          <Tabs
+            value={activeView}
+            onValueChange={(v) => setActiveView(v as "login" | "register")}
+            className="w-full md:hidden"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Register</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login" className="mt-4">
+              <Card className="border-2 shadow-lg">
+                <CardContent className="p-6">
+                  <LoginForm
+                    form={form}
+                    onSubmit={form.handleSubmit((data) => {
+                      loginMutation.mutate(data);
+                    })}
+                    isLoading={loginMutation.isPending}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="register" className="mt-4">
+              <Card className="border-2 shadow-lg">
+                <CardContent className="p-6">
+                  <RegisterForm
+                    form={registerForm}
+                    onSubmit={registerForm.handleSubmit((data) => {
+                      registerMutation.mutate({
+                        data,
+                      });
+                    })}
+                    isLoading={registerMutation.isPending}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
           <Card className="hidden overflow-hidden border-2 py-0 shadow-lg md:block">
             <CardContent className="grid p-0 md:grid-cols-2">

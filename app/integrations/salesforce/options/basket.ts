@@ -5,6 +5,7 @@ import {
   getBasket,
   getShippingMethodsForShipment,
   mergeBasket,
+  updateBillingAddressForBasket,
   updateCustomerForBasket,
   updateShippingAddressForShipment,
   updateShippingMethod,
@@ -13,10 +14,11 @@ import {
 import {
   AddItemToBasketParams,
   AddPaymentInstrumentToBasketParams,
+  UpdateBillingAddressForBasketParams,
   UpdateShippingAddressForShipmentParams,
   UpdateShippingMethodForShipmentParams,
   UpdateShippingMethodParams,
-} from "@/integrations/salesforce/types";
+} from "@/integrations/salesforce/types/params";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -86,6 +88,16 @@ export const useUpdateShippingMethodForShipmentMutation = () => {
   return useMutation({
     mutationFn: async (data: UpdateShippingMethodForShipmentParams) =>
       updateShippingMethodForShipment({ data }),
+    meta: {
+      invalidateQuery: getBasketQueryOptions().queryKey,
+    },
+  });
+};
+
+export const useUpdateBillingAddressForBasketMutation = () => {
+  return useMutation({
+    mutationFn: async (data: UpdateBillingAddressForBasketParams) =>
+      updateBillingAddressForBasket({ data }),
     meta: {
       invalidateQuery: getBasketQueryOptions().queryKey,
     },

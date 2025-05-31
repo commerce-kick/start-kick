@@ -1,5 +1,5 @@
 import { SalesforceSessionManager } from "@/integrations/salesforce/session-manager";
-import { SalesforceConfig } from "@/integrations/salesforce/types";
+import { SalesforceConfig } from "@/integrations/salesforce/types/params";
 import SDK from "commerce-sdk-isomorphic";
 
 const { ShopperLogin, helpers } = SDK;

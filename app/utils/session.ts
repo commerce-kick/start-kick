@@ -1,4 +1,4 @@
-import type { SalesforceSessionData } from "@/integrations/salesforce/types";
+import type { SalesforceSessionData } from "@/integrations/salesforce/types/params";
 import { useSession } from "@tanstack/react-start/server";
 
 export function useAppSession() {

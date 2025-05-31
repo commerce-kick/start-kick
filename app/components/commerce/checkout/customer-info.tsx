@@ -1,22 +1,24 @@
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { AuthTypes } from "@/integrations/salesforce/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,9 +31,9 @@ type CustomerFormData = z.infer<typeof customerSchema>;
 
 interface CustomerInfoProps {
   defaultValues?: Partial<CustomerFormData>;
-  customer?: any;
-  onNext: (data: CustomerFormData) => void;
-  onBack: () => void;
+  customer?: ShopperCustomersTypes.Customer;
+  onNext: (data: CustomerFormData) => Promise<void>;
+  onBack: () => Promise<void>;
 }
 
 export function CustomerInfo({
@@ -40,7 +42,7 @@ export function CustomerInfo({
   onNext,
   onBack,
 }: CustomerInfoProps) {
-  const isRegistered = customer?.type === "registered";
+  const isRegistered = customer?.authType === AuthTypes.REGISTERED;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CustomerFormData>({
@@ -70,7 +72,10 @@ export function CustomerInfo({
         </CardDescription>
       </CardHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-6"
+        >
           <CardContent className="space-y-4">
             <FormField
               control={form.control}
