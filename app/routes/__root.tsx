@@ -4,10 +4,10 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { Footer } from "@/components/commerce/footer";
-import { Header } from "@/components/commerce/header";
+import { HeaderWithFallback } from "@/components/commerce/header-with-fallback";
 import { Toaster } from "@/components/ui/sonner";
 import { getCustomerQueryOptions } from "@/integrations/salesforce/options/customer";
 import { getCategoryQueryOptions } from "@/integrations/salesforce/options/products";
@@ -73,7 +73,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        {data.categories && <Header categories={data.categories} user={user} />}
+        <HeaderWithFallback categories={data.categories} user={user} />
+
         <div className="flex min-h-screen flex-col">{children}</div>
 
         <Footer />
