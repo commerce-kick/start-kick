@@ -400,8 +400,6 @@ function RouteComponent() {
     ];
 
     try {
-      // Here you would call your addItemToNewOrExistingBasket function
-      console.log("Adding to cart:", productSelectionValues);
       addToBasketMutation.mutate({
         body: productSelectionValues,
       });
@@ -538,16 +536,16 @@ function RouteComponent() {
                   promotion={promotion}
                   className="text-2xl"
                 />
-                {promotion && (
+                {promotion  && (
                   <div className="flex items-center gap-2">
                     <Badge variant="destructive" className="text-xs">
                       Save{" "}
                       {promotion.promotionalPrice &&
                       (selectedVariant?.price || product.price)
                         ? Math.round(
-                            (((selectedVariant?.price || product.price) -
-                              promotion.promotionalPrice) /
-                              (selectedVariant?.price || product.price)) *
+                            (((selectedVariant?.price ?? product.price ?? 0) -
+                              (promotion.promotionalPrice ?? 0)) /
+                              (selectedVariant?.price ?? product.price ?? 1)) *
                               100,
                           )
                         : 0}

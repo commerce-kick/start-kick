@@ -5,13 +5,7 @@ import { InteractiveGridPattern } from "@/components/magic/interactive-pattern";
 import { TextAnimate } from "@/components/magic/text-animate";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { getProductsQueryOptions } from "@/integrations/salesforce/options/products";
 import { cn } from "@/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -95,7 +89,7 @@ function Home() {
         </div>
         <div className="flex justify-center">
           <div className="bg-secondary/5 border-border pointer-events-none relative flex aspect-video w-full items-center justify-center rounded-lg border text-4xl capitalize shadow-sm backdrop-blur-sm">
-            The modern Monolith
+            Build with love and TanStack Start
           </div>
         </div>
       </section>
@@ -164,7 +158,7 @@ function Home() {
           <Carousel className="mx-auto">
             <CarouselContent>
               {products.hits?.map((product, index) => (
-                <CarouselItem key={`product-${index}`} className="md:basis-1/4">
+                <CarouselItem key={`product-${index}`} className="md:basis-1/4 p-4">
                   <ProductCard product={product} />
                 </CarouselItem>
               ))}

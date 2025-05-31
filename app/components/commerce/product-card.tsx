@@ -26,9 +26,8 @@ import {
   Heart,
   Shield,
   ShoppingCart,
-  Star,
   Truck,
-  Zap,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 
@@ -155,10 +154,6 @@ export default function ProductCard({
         )
       : 0;
 
-  // Mock rating (in real app, this would come from the API)
-  const rating = 4.2;
-  const reviewCount = Math.floor(Math.random() * 500) + 10;
-
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -175,7 +170,7 @@ export default function ProductCard({
     return (
       <Card
         className={cn(
-          "group overflow-hidden border py-0 transition-all duration-300 hover:shadow-lg",
+          "group overflow-hidden border py-0 transition-all duration-300 hover:shadow-md",
           className,
         )}
       >
@@ -264,25 +259,6 @@ export default function ProductCard({
                 </p>
               )}
 
-              {/* Rating */}
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < Math.floor(rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-200"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-muted-foreground text-sm">
-                  {rating} ({reviewCount} reviews)
-                </span>
-              </div>
-
               {/* Features */}
               <div className="text-muted-foreground flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1">
@@ -364,7 +340,7 @@ export default function ProductCard({
   return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden border-0 pt-0 shadow-sm transition-all duration-300 hover:shadow-xl",
+        "group flex h-full flex-col overflow-hidden border-0 pt-0 shadow-sm transition-all duration-300 hover:shadow-md",
         className,
       )}
     >
@@ -453,19 +429,6 @@ export default function ProductCard({
             {normalizedProduct.shortDescription}
           </p>
         )}
-
-        {/* Rating */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3 w-3 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
-              />
-            ))}
-          </div>
-          <span className="text-muted-foreground text-xs">({reviewCount})</span>
-        </div>
 
         {/* Features */}
         <div className="flex flex-wrap gap-1">
