@@ -187,3 +187,20 @@ export const deleteCustomerAddress = createServerFn({ method: "POST" })
       },
     });
   });
+
+export const deleteItemFormProductList = createServerFn({ method: "POST" })
+  .validator((data: { listId: string; itemId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api } = await getSalesforceAPI();
+    const { data: sessionData } = await useAppSession();
+
+    const shopperCustomers = await api.shopperCustomers();
+
+    return await shopperCustomers.deleteCustomerProductListItem({
+      parameters: {
+        customerId: sessionData.customerId,
+        listId: data.listId,
+        itemId: data.itemId,
+      },
+    });
+  });

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWishList } from "@/hooks/use-wishlist";
+import { useDeleteItemFromProductListMutation } from "@/integrations/salesforce/options/customer";
 import { getProductsByIdsQueryOptions } from "@/integrations/salesforce/options/products";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ShopperProductsTypes } from "commerce-sdk-isomorphic";
@@ -30,8 +31,22 @@ function WishlistContent() {
   const { data: productsResult, isLoading: productsLoading } = useSuspenseQuery(
     getProductsByIdsQueryOptions({ ids: productIds }),
   );
+
+  const deleteItemFromListMutation = useDeleteItemFromProductListMutation();
+
   const wishlistItems = wishList?.customerProductListItems || [];
   const products = productsResult?.data || [];
+
+  const handleRemoveFromList = (itemId: string) => {
+    if (!wishList?.id) {
+      return;
+    }
+
+    deleteItemFromListMutation.mutateAsync({
+      listId: wishList?.id,
+      itemId: itemId,
+    });
+  };
 
   if (wishlistItems.length === 0) {
     return (
@@ -85,6 +100,12 @@ function WishlistContent() {
               product={product as ShopperProductsTypes.Product}
               viewMode={isMobile ? "grid" : "list"}
               isFavorite={true}
+              onWishListToggle={() => {
+                if (!item.id) {
+                  return;
+                }
+                handleRemoveFromList(item.id);
+              }}
             />
           );
         })}

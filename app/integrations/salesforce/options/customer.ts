@@ -5,6 +5,7 @@ import {
   createProductList,
   customerProductLists,
   deleteCustomerAddress,
+  deleteItemFormProductList,
   getCustomer,
   getCustomerOrders,
   updateCustomerAddress,
@@ -55,6 +56,18 @@ export const useAddItemToProductListMutation = () => {
     },
     meta: {
       sucessMessage: "Done",
+      invalidateQuery: getProductListQueryOptions().queryKey,
+    },
+  });
+};
+
+export const useDeleteItemFromProductListMutation = () => {
+  return useMutation({
+    mutationFn: async (data: { listId: string; itemId: string }) => {
+      return deleteItemFormProductList({ data });
+    },
+    meta: {
+      sucessMessage: "Product deleted",
       invalidateQuery: getProductListQueryOptions().queryKey,
     },
   });
