@@ -152,14 +152,10 @@ export function ProductImageGallery({
               >
                 <div className="relative aspect-square">
                   <Image
+                    layout="fullWidth"
                     src={image.src || "/placeholder.svg"}
                     alt={image.alt}
                     className="h-full w-full object-cover"
-                    aspectRatio="square"
-                    showLoadingState
-                    placeholder="skeleton"
-                    priority={index === 0 && !lazy}
-                    lazy={lazy || index > 0}
                   />
 
                   {/* Image Counter */}
@@ -219,12 +215,10 @@ export function ProductImageGallery({
                     )}
                   >
                     <Image
+                      layout="fullWidth"
                       src={image.src || "/placeholder.svg"}
                       alt={image.alt}
                       className="h-full w-full object-cover"
-                      aspectRatio="square"
-                      lazy={lazy || index > 3}
-                      showLoadingState={false}
                     />
                     {index === current && (
                       <div className="bg-primary/10 absolute inset-0" />
@@ -316,12 +310,10 @@ export function ProductImagePreview({
       )}
     >
       <Image
+        layout="fullWidth"
         src={primaryImage.disBaseLink || "/placeholder.svg"}
         alt={primaryImage.alt || productName}
         className="h-full w-full object-cover"
-        aspectRatio="square"
-        showLoadingState
-        placeholder="skeleton"
       />
       {totalImages > 1 && (
         <Badge variant="secondary" className="absolute top-2 right-2 text-xs">

@@ -18,7 +18,7 @@ export function ImageCarousel({
         {images.map((image, index) => (
           <CarouselItem key={index}>
             {image.src && (
-              <Image className="w-full" alt={image.alt} src={image.src} />
+              <Image layout="fullWidth" className="w-full" alt={image.alt} src={image.src} />
             )}
           </CarouselItem>
         ))}

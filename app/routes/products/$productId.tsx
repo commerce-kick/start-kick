@@ -1,5 +1,6 @@
 import Price from "@/components/commerce/price";
 import { ProductImageGallery } from "@/components/commerce/product-image-gallery";
+import { ProductRecommendations } from "@/components/commerce/product-recommendations";
 import { ProductVariations } from "@/components/commerce/product-variations";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,7 +48,7 @@ import {
   Shield,
   ShoppingBag,
   Truck,
-  Zap
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -844,6 +845,8 @@ function RouteComponent() {
             </TabsContent>
           </Tabs>
         </div>
+
+        <ProductRecommendations products={[{ id: actualProductId }]} recId="pdp-similar-items" />
       </div>
     </div>
   );

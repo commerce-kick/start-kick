@@ -27,7 +27,7 @@ import {
   Shield,
   ShoppingCart,
   Truck,
-  Zap
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -179,6 +179,7 @@ export default function ProductCard({
           <div className="relative h-64 w-64 flex-shrink-0">
             <div className="relative aspect-square overflow-hidden bg-gray-50">
               <Image
+                layout="fullWidth"
                 src={primaryImage || "/placeholder.svg?height=200&width=200"}
                 alt={imageAlt}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -347,6 +348,7 @@ export default function ProductCard({
       <CardHeader className="p-0">
         <div className="relative aspect-square overflow-hidden bg-gray-50">
           <Image
+            layout="fullWidth"
             src={primaryImage || "/placeholder.svg?height=300&width=300"}
             alt={imageAlt}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
