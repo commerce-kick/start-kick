@@ -151,7 +151,7 @@ export function AddressForm({
         countryCode: defaultValues?.countryCode || "US",
       },
       saveAddress: isRegistered,
-      setAsDefault: !customer?.addresses?.length, // Set as default if no existing addresses
+      setAsDefault: !customer?.addresses?.length || defaultValues?.preferred, // Set as default if no existing addresses
     },
   });
 

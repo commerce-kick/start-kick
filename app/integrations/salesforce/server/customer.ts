@@ -142,7 +142,7 @@ export const getCustomerOrders = createServerFn({ method: "GET" })
     })) as ShopperCustomersTypes.CustomerOrderResult;
   });
 
-export const createCustomerAdress = createServerFn({ method: "POST" })
+export const createCustomerAddress = createServerFn({ method: "POST" })
   .validator((data: CreateCustomerAddressParams) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
@@ -154,5 +154,36 @@ export const createCustomerAdress = createServerFn({ method: "POST" })
         customerId: customerId,
       },
       body: data.body,
+    });
+  });
+
+export const updateCustomerAddress = createServerFn({ method: "POST" })
+  .validator((data: CreateCustomerAddressParams) => data)
+  .handler(async ({ data }) => {
+    const { api, client } = await getSalesforceAPI();
+    const shopperCustomers = await api.shopperCustomers();
+    const customerId = await client.getCustomerId();
+
+    return await shopperCustomers.updateCustomerAddress({
+      parameters: {
+        customerId: customerId,
+        addressName: data.body.addressId,
+      },
+      body: data.body,
+    });
+  });
+
+export const deleteCustomerAddress = createServerFn({ method: "POST" })
+  .validator((data: { addressId: string }) => data)
+  .handler(async ({ data }) => {
+    const { api, client } = await getSalesforceAPI();
+    const shopperCustomers = await api.shopperCustomers();
+    const customerId = await client.getCustomerId();
+
+    return await shopperCustomers.removeCustomerAddress({
+      parameters: {
+        customerId: customerId,
+        addressName: data.addressId,
+      },
     });
   });

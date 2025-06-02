@@ -3,8 +3,10 @@ import { AddressManagement } from "@/components/commerce/account/address-managem
 import {
   getCustomerQueryOptions,
   useCreateCustumerAddressMutation,
+  useDeleteCustomerAddressMutation,
+  useUpdateCustomerAddressMutation,
 } from "@/integrations/salesforce/options/customer";
-import { AddressCallback } from "@/integrations/salesforce/types/params";
+import { Address } from "@/integrations/salesforce/types/api";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
@@ -20,14 +22,40 @@ export const Route = createFileRoute("/_account/address")({
 
 function AddressContent() {
   const { data: customer } = useSuspenseQuery(getCustomerQueryOptions());
-  const createCustomerAdressMutation = useCreateCustumerAddressMutation();
+  const createCustomerAddressMutation = useCreateCustumerAddressMutation();
+  const deleteCustomerAddressMutation = useDeleteCustomerAddressMutation();
+  const updateCustomerAddressMutation = useUpdateCustomerAddressMutation();
 
-  const handleAddAddress = async (data: AddressCallback) => {
-    await createCustomerAdressMutation.mutateAsync({
+  const handleAddAddress = async (data: Address) => {
+    await createCustomerAddressMutation.mutateAsync({
+      body: data,
+    });
+  };
+
+  const handleDelete = async (addressId: string) => {
+    deleteCustomerAddressMutation.mutate({
+      addressId,
+    });
+  };
+
+  const handleDefault = async (addressId: string) => {
+    const address = customer.addresses?.find(
+      (address) => address.addressId === addressId,
+    );
+
+    if (!address) return;
+
+    updateCustomerAddressMutation.mutate({
       body: {
-        ...data.address,
-        preferred: data.setAsDefault,
+        ...address,
+        preferred: true,
       },
+    });
+  };
+
+  const handleUpdate = async (newAddress: Address) => {
+    updateCustomerAddressMutation.mutate({
+      body: newAddress,
     });
   };
 
@@ -48,9 +76,9 @@ function AddressContent() {
       <AddressManagement
         customer={customer}
         onAddAddress={handleAddAddress}
-        onDeleteAddress={() => {}}
-        onSetDefault={() => {}}
-        onUpdateAddress={() => {}}
+        onDeleteAddress={handleDelete}
+        onSetDefault={handleDefault}
+        onUpdateAddress={handleUpdate}
       />
     </div>
   );

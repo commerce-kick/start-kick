@@ -8,18 +8,59 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Address, Customer } from "@/integrations/salesforce/types/api";
-import { AddressCallback } from "@/integrations/salesforce/types/params";
-import { MapPin, MoreHorizontal, Plus } from "lucide-react";
+import { MapPin, MoreHorizontal, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 
 interface AddressManagementProps {
   customer: Customer;
-  onAddAddress: (data: AddressCallback) => void;
-  onUpdateAddress: (addressId: string, data: Address) => void;
+  onAddAddress: (data: Address) => void;
+  onUpdateAddress: (data: Address) => void;
   onDeleteAddress: (addressId: string) => void;
   onSetDefault: (addressId: string) => void;
 }
+
+const AddressOptions = ({
+  onDefault,
+  onDelete,
+  onUpdate,
+}: {
+  onDelete: () => void;
+  onUpdate: () => void;
+  onDefault: () => void;
+}) => {
+  return (
+    <DropdownMenu>
+      <Button variant="ghost" size="sm" className="gap-2" asChild>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+      </Button>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="font-normal">Options</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onDefault}>Default</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onUpdate}>Update</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onDelete} variant="destructive">
+          <Trash className="h-4 w-4" />
+          <span>Delete</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export function AddressManagement({
   customer,
@@ -28,22 +69,35 @@ export function AddressManagement({
   onDeleteAddress,
   onSetDefault,
 }: AddressManagementProps) {
+  const [address, setAddress] = useState<Address | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
 
   const formatAddress = (address: Address) => {
     return `${address.address1}${address.address2 ? `, ${address.address2}` : ""}, ${address.city}, ${address.stateCode} ${address.postalCode}`;
   };
 
-  const handleAddAddress = (data: {
-    address: Address;
-    saveAddress?: boolean;
-    setAsDefault?: boolean;
-  }) => {
-    onAddAddress({
-      address: data.address,
-      setAsDefault: data.setAsDefault,
-    });
+  const handleCallback = (newAddress: Address) => {
     setIsAddingNew(false);
+    setAddress(null);
+    if (address?.addressId) {
+      onUpdateAddress(newAddress);
+    } else {
+      onAddAddress(newAddress);
+    }
+  };
+
+  const hanldeUpdate = async (address: Address) => {
+    setAddress(address);
+    setIsAddingNew(true);
+  };
+
+  const handleOpenChange = (open) => {
+    if (open) {
+      setIsAddingNew(true);
+    } else {
+      setIsAddingNew(false);
+      setAddress(null);
+    }
   };
 
   return (
@@ -76,9 +130,11 @@ export function AddressManagement({
                   </p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+              <AddressOptions
+                onDefault={() => onSetDefault(address.addressId)}
+                onDelete={() => onDeleteAddress(address.addressId)}
+                onUpdate={() => hanldeUpdate(address)}
+              />
             </div>
           ))}
         </>
@@ -91,7 +147,7 @@ export function AddressManagement({
           </p>
         </div>
       )}
-      <Dialog open={isAddingNew} onOpenChange={setIsAddingNew}>
+      <Dialog open={isAddingNew} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant="outline" className="w-full">
             <Plus className="mr-2 h-4 w-4" />
@@ -109,7 +165,16 @@ export function AddressManagement({
             customer={customer}
             title=""
             description=""
-            onSubmit={handleAddAddress}
+            defaultValues={{ ...address }}
+            onSubmit={(data) => {
+              const formatData: Address = {
+                ...data.address,
+                preferred: data.setAsDefault,
+                ...(address && { addressId: address.addressId }),
+              };
+
+              handleCallback(formatData);
+            }}
             onBack={() => setIsAddingNew(false)}
             submitButtonText="Save Address"
           />

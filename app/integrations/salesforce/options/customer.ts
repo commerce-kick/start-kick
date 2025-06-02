@@ -1,11 +1,13 @@
 import { ProductListTypes } from "@/integrations/salesforce/enums";
 import {
   addItemToProductList,
-  createCustomerAdress,
+  createCustomerAddress,
   createProductList,
   customerProductLists,
+  deleteCustomerAddress,
   getCustomer,
   getCustomerOrders,
+  updateCustomerAddress,
 } from "@/integrations/salesforce/server/customer";
 import { Customer } from "@/integrations/salesforce/types/api";
 import {
@@ -61,9 +63,31 @@ export const useAddItemToProductListMutation = () => {
 export const useCreateCustumerAddressMutation = () => {
   return useMutation({
     mutationFn: async (data: CreateCustomerAddressParams) =>
-      createCustomerAdress({ data }),
+      createCustomerAddress({ data }),
     meta: {
       sucessMessage: "New Address created",
+      invalidateQuery: getCustomerQueryOptions().queryKey,
+    },
+  });
+};
+
+export const useUpdateCustomerAddressMutation = () => {
+  return useMutation({
+    mutationFn: async (data: CreateCustomerAddressParams) =>
+      updateCustomerAddress({ data }),
+    meta: {
+      sucessMessage: "Address deleted",
+      invalidateQuery: getCustomerQueryOptions().queryKey,
+    },
+  });
+};
+
+export const useDeleteCustomerAddressMutation = () => {
+  return useMutation({
+    mutationFn: async (data: { addressId: string }) =>
+      deleteCustomerAddress({ data }),
+    meta: {
+      sucessMessage: "Address deleted",
       invalidateQuery: getCustomerQueryOptions().queryKey,
     },
   });

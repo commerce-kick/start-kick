@@ -51,7 +51,7 @@ export function ShippingAddressWithSelector({
     setAsDefault?: boolean;
   }>({});
 
-  const createCustomerAdressMutation = useCreateCustumerAddressMutation();
+  const createCustomerAddressMutation = useCreateCustumerAddressMutation();
 
   const form = useForm({
     resolver: zodResolver(shippingFormSchema),
@@ -66,7 +66,7 @@ export function ShippingAddressWithSelector({
     setAsDefault?: boolean;
   }) => {
     if (data.saveAddress) {
-      await createCustomerAdressMutation.mutateAsync({
+      await createCustomerAddressMutation.mutateAsync({
         body: {
           ...data.address,
           preferred: data.setAsDefault,
