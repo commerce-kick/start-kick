@@ -136,3 +136,9 @@ export interface AddressCallback {
   saveAddress?: boolean;
   setAsDefault?: boolean;
 }
+
+export interface GetPageParams {
+  pageId: string;
+  aspectAttributes?: string;
+  parameters?: string;
+}

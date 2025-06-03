@@ -16,6 +16,7 @@ import { Route as CheckoutImport } from './routes/checkout'
 import { Route as AccountImport } from './routes/_account'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
+import { Route as PagesPageIdImport } from './routes/pages/$pageId'
 import { Route as CategoryCategoryIdImport } from './routes/category/$categoryId'
 import { Route as AccountWishlistImport } from './routes/_account/wishlist'
 import { Route as AccountOrderHistoryImport } from './routes/_account/order-history'
@@ -51,6 +52,12 @@ const IndexRoute = IndexImport.update({
 const ProductsProductIdRoute = ProductsProductIdImport.update({
   id: '/products/$productId',
   path: '/products/$productId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PagesPageIdRoute = PagesPageIdImport.update({
+  id: '/pages/$pageId',
+  path: '/pages/$pageId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -157,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoryCategoryIdImport
       parentRoute: typeof rootRoute
     }
+    '/pages/$pageId': {
+      id: '/pages/$pageId'
+      path: '/pages/$pageId'
+      fullPath: '/pages/$pageId'
+      preLoaderRoute: typeof PagesPageIdImport
+      parentRoute: typeof rootRoute
+    }
     '/products/$productId': {
       id: '/products/$productId'
       path: '/products/$productId'
@@ -205,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/order-history': typeof AccountOrderHistoryRoute
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
+  '/pages/$pageId': typeof PagesPageIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
@@ -219,6 +234,7 @@ export interface FileRoutesByTo {
   '/order-history': typeof AccountOrderHistoryRoute
   '/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
+  '/pages/$pageId': typeof PagesPageIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
@@ -234,6 +250,7 @@ export interface FileRoutesById {
   '/_account/order-history': typeof AccountOrderHistoryRoute
   '/_account/wishlist': typeof AccountWishlistRoute
   '/category/$categoryId': typeof CategoryCategoryIdRoute
+  '/pages/$pageId': typeof PagesPageIdRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/_account/orders/$orderId': typeof AccountOrdersOrderIdRoute
 }
@@ -250,6 +267,7 @@ export interface FileRouteTypes {
     | '/order-history'
     | '/wishlist'
     | '/category/$categoryId'
+    | '/pages/$pageId'
     | '/products/$productId'
     | '/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
@@ -263,6 +281,7 @@ export interface FileRouteTypes {
     | '/order-history'
     | '/wishlist'
     | '/category/$categoryId'
+    | '/pages/$pageId'
     | '/products/$productId'
     | '/orders/$orderId'
   id:
@@ -276,6 +295,7 @@ export interface FileRouteTypes {
     | '/_account/order-history'
     | '/_account/wishlist'
     | '/category/$categoryId'
+    | '/pages/$pageId'
     | '/products/$productId'
     | '/_account/orders/$orderId'
   fileRoutesById: FileRoutesById
@@ -287,6 +307,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
+  PagesPageIdRoute: typeof PagesPageIdRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
 
@@ -296,6 +317,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   CategoryCategoryIdRoute: CategoryCategoryIdRoute,
+  PagesPageIdRoute: PagesPageIdRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
 }
 
@@ -314,6 +336,7 @@ export const routeTree = rootRoute
         "/checkout",
         "/login",
         "/category/$categoryId",
+        "/pages/$pageId",
         "/products/$productId"
       ]
     },
@@ -354,6 +377,9 @@ export const routeTree = rootRoute
     },
     "/category/$categoryId": {
       "filePath": "category/$categoryId.tsx"
+    },
+    "/pages/$pageId": {
+      "filePath": "pages/$pageId.tsx"
     },
     "/products/$productId": {
       "filePath": "products/$productId.tsx"
