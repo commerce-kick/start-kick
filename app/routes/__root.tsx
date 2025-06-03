@@ -15,6 +15,7 @@ import appCss from "@/styles/app.css?url";
 import { QueryClient, useSuspenseQueries } from "@tanstack/react-query";
 
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -80,7 +81,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <Footer />
 
         <Analytics />
-
+        <SpeedInsights />
+        
         <Toaster />
         <Scripts />
       </body>
