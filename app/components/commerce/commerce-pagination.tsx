@@ -7,6 +7,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { PLPSearchParams } from "@/lib/commerce/url-params";
 import { cn } from "@/lib/utils";
 
 export function CommercePagination({
@@ -18,7 +19,7 @@ export function CommercePagination({
   requestedLimit: number;
   total: number;
   offset: number;
-  navigate: any;
+  navigate: (updateFn: (prev: PLPSearchParams) => PLPSearchParams) => void;
 }) {
   const limit = requestedLimit;
 
@@ -32,24 +33,18 @@ export function CommercePagination({
 
   const goToPage = (page: number) => {
     const newOffset = (page - 1) * limit;
-    navigate({
-      search: (prev) => ({ ...prev, offset: newOffset }),
-    });
+    navigate((prev) => ({ ...prev, offset: newOffset }));
   };
 
   const nextPage = () => {
     if (hasNext) {
-      navigate({
-        search: (prev) => ({ ...prev, offset: offset + limit }),
-      });
+      navigate((prev) => ({ ...prev, offset: offset + limit }));
     }
   };
 
   const prevPage = () => {
     if (hasPrev) {
-      navigate({
-        search: (prev) => ({ ...prev, offset: Math.max(0, offset - limit) }),
-      });
+      navigate((prev) => ({ ...prev, offset: Math.max(0, offset - limit) }));
     }
   };
 

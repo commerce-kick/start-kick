@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrderQueryOptions } from "@/integrations/salesforce/options/orders";
-import { formatCurrency } from "@/lib/commerce";
+import { formatCurrency } from "@/lib/commerce/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";

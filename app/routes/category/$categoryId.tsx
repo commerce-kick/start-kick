@@ -21,7 +21,6 @@ import { getProductsQueryOptions } from "@/integrations/salesforce/options/produ
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
-  Link,
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
@@ -30,29 +29,46 @@ import { Suspense, useState } from "react";
 
 import { CommercePagination } from "@/components/commerce/commerce-pagination";
 import ProductCard from "@/components/commerce/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useWishList } from "@/hooks/use-wishlist";
 import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { useAddItemToProductListMutation } from "@/integrations/salesforce/options/customer";
 import { cn } from "@/lib/utils";
-import type { ShopperSearchTypes } from "commerce-sdk-isomorphic";
-import { z } from "zod";
 
+import {
+  buildRefineArray,
+  parseUrlParams,
+  PLPSearchParams,
+  serializeSearchParams,
+} from "@/lib/commerce/url-params";
+import type { ShopperSearchTypes } from "commerce-sdk-isomorphic";
+
+// Updated search validation to handle pipe-separated values
 export const Route = createFileRoute("/category/$categoryId")({
   component: RouteComponent,
-  validateSearch: z.object({
-    offset: z.number().optional(),
-    sort: z.string().optional(),
-    refinements: z.record(z.array(z.string())).optional(),
-  }),
-  loader: async ({ params, context }) => {
+  loaderDeps: ({ search }) => search,
+  loader: async ({ params, context, deps }) => {
+    console.log("loader");
+
     const { queryClient } = context;
+
+    // Parse search params using shared utility (handles pipe separation)
+    const {
+      offset = 0,
+      sort,
+      refinements = {},
+    } = parseUrlParams({
+      categoryId: params.categoryId,
+      ...deps,
+    });
+
+    const refineArray = buildRefineArray(params.categoryId, refinements);
 
     await queryClient.ensureQueryData(
       getProductsQueryOptions({
-        refine: [`cgid:${params.categoryId}`],
+        refine: refineArray,
         limit: REQUESTED_LIMIT,
-        ...params,
+        offset,
+        sort,
       }),
     );
   },
@@ -61,7 +77,7 @@ export const Route = createFileRoute("/category/$categoryId")({
 const FiltersContent = ({
   refinements,
   productSorts,
-  cgid,
+  categoryId,
   selectedRefinements = {},
   selectedSort,
   handleSelectedRefinement,
@@ -70,7 +86,7 @@ const FiltersContent = ({
 }: {
   refinements: ShopperSearchTypes.ProductSearchRefinement[];
   productSorts: ShopperSearchTypes.ProductSearchSortingOption[];
-  cgid: string;
+  categoryId: string;
   selectedRefinements?: Record<string, string[]>;
   selectedSort?: string;
   handleSelectedRefinement: (attributeId: string, value: string) => void;
@@ -198,108 +214,36 @@ const FiltersContent = ({
         ))}
 
       {/* Reset Button */}
-      <Button variant="outline" className="w-full" asChild>
-        <Link to="/" params={{ cgid }}>
-          <X className="mr-2 h-4 w-4" />
-          Reset All Filters
-        </Link>
+      <Button variant="outline" className="w-full" onClick={handleClearFilters}>
+        <X className="mr-2 h-4 w-4" />
+        Reset All Filters
       </Button>
     </div>
   );
 };
 
-function ProductGridSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
-  return (
-    <div
-      className={cn(
-        "grid gap-6",
-        viewMode === "grid"
-          ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
-          : "grid-cols-1",
-      )}
-    >
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Card key={i} className="overflow-hidden pt-0">
-          <CardContent className="p-0">
-            <Skeleton className="h-48 w-full" />
-            <div className="space-y-2 p-4">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-6 w-1/4" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function FiltersSkeleton() {
-  return (
-    <div className="space-y-6">
-      {/* Sort Skeleton */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Filter Sections Skeleton */}
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-24" />
-              <Separator />
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <div
-                    key={j}
-                    className="flex items-center justify-between space-x-2"
-                  >
-                    <div className="flex flex-1 items-center space-x-2">
-                      <Skeleton className="h-4 w-4" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <Skeleton className="h-5 w-8" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 function CategoryComponent() {
+  const search = useSearch({ from: "/category/$categoryId" });
+  const { categoryId } = Route.useParams();
+  const navigate = useNavigate({ from: "/category/$categoryId" });
+
+  // Parse search params using shared utility (handles pipe separation)
   const {
     offset = 0,
     sort,
     refinements = {},
-  } = useSearch({ from: "/category/$categoryId" });
-
-  const { categoryId } = Route.useParams();
-  const navigate = useNavigate({ from: "/category/$categoryId" });
+  } = parseUrlParams({
+    categoryId,
+    ...search,
+  });
 
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { wishList } = useWishList();
   const addToWishListMutation = useAddItemToProductListMutation();
 
-  // Build refine array for API
-  const refineArray = [`cgid=${categoryId}`];
-  Object.entries(refinements).forEach(([attributeId, values]) => {
-    if (values.length > 0) {
-      // Join multiple values with pipe separator instead of creating separate entries
-      const joinedValues = values.join("|");
-      refineArray.push(`${attributeId}=${joinedValues}`);
-    }
-  });
+  // Build refine array for API using shared utility (uses pipe separation)
+  const refineArray = buildRefineArray(categoryId, refinements);
 
   const { data, isLoading, isError } = useSuspenseQuery(
     getProductsQueryOptions({
@@ -309,6 +253,20 @@ function CategoryComponent() {
       sort: sort,
     }),
   );
+
+  const navigateWeb = (
+    updateFn: (prev: PLPSearchParams) => PLPSearchParams,
+  ) => {
+    const currentSearch = { offset, sort, refinements };
+    const newSearch = updateFn(currentSearch);
+
+    // Serialize params for web using shared utility (pipe separation)
+    const serializedParams = serializeSearchParams(newSearch, "web");
+
+    navigate({
+      search: serializedParams,
+    });
+  };
 
   const handleSelectedRefinement = (attributeId: string, value: string) => {
     const currentValues = refinements[attributeId] || [];
@@ -323,34 +281,27 @@ function CategoryComponent() {
       newRefinements[attributeId] = newValues;
     }
 
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        refinements:
-          Object.keys(newRefinements).length > 0 ? newRefinements : undefined,
-        offset: 0, // Reset to first page when filtering
-      }),
-    });
+    navigateWeb((prev) => ({
+      ...prev,
+      refinements: Object.keys(newRefinements).length > 0 ? newRefinements : {},
+      offset: 0, // Reset to first page when filtering
+    }));
   };
 
   const handleOnSortChange = (newSort: string) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        sort: newSort,
-        offset: 0, // Reset to first page when sorting
-      }),
-    });
+    navigateWeb((prev) => ({
+      ...prev,
+      sort: newSort,
+      offset: 0, // Reset to first page when sorting
+    }));
   };
 
   const handleClearFilters = () => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        refinements: undefined,
-        offset: 0,
-      }),
-    });
+    navigateWeb((prev) => ({
+      ...prev,
+      refinements: {},
+      offset: 0,
+    }));
   };
 
   const handleAddToWishList = (productId: string) => {
@@ -455,7 +406,7 @@ function CategoryComponent() {
                 <FiltersContent
                   refinements={data.refinements}
                   productSorts={data.sortingOptions}
-                  cgid={categoryId}
+                  categoryId={categoryId}
                   selectedRefinements={refinements}
                   selectedSort={sort}
                   handleSelectedRefinement={handleSelectedRefinement}
@@ -480,20 +431,16 @@ function CategoryComponent() {
                 <Badge variant="secondary">{activeFiltersCount}</Badge>
               )}
             </div>
-            {isLoading || !data ? (
-              <FiltersSkeleton />
-            ) : (
-              <FiltersContent
-                refinements={data.refinements}
-                productSorts={data.sortingOptions}
-                cgid={categoryId}
-                selectedRefinements={refinements}
-                selectedSort={sort}
-                handleSelectedRefinement={handleSelectedRefinement}
-                handleOnSortChange={handleOnSortChange}
-                handleClearFilters={handleClearFilters}
-              />
-            )}
+            <FiltersContent
+              refinements={data.refinements}
+              productSorts={data.sortingOptions}
+              categoryId={categoryId}
+              selectedRefinements={refinements}
+              selectedSort={sort}
+              handleSelectedRefinement={handleSelectedRefinement}
+              handleOnSortChange={handleOnSortChange}
+              handleClearFilters={handleClearFilters}
+            />
           </div>
         </div>
 
@@ -528,7 +475,7 @@ function CategoryComponent() {
                 total={data.total}
                 offset={offset}
                 requestedLimit={REQUESTED_LIMIT}
-                navigate={navigate}
+                navigate={navigateWeb}
               />
             </>
           ) : (
@@ -552,60 +499,9 @@ function CategoryComponent() {
   );
 }
 
-function CategoryPageSkeleton() {
-  return (
-    <div className="container mx-auto space-y-6 py-8">
-      {/* Header Skeleton */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Skeleton className="h-8 w-32" /> {/* Title */}
-          <Skeleton className="mt-2 h-4 w-24" /> {/* Results count */}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* View Mode Toggle Skeleton */}
-          <div className="hidden rounded-md border sm:flex">
-            <Skeleton className="h-9 w-9" />
-            <Skeleton className="h-9 w-9" />
-          </div>
-
-          {/* Mobile Filter Button Skeleton */}
-          <Skeleton className="h-9 w-24 md:hidden" />
-        </div>
-      </div>
-
-      {/* Main Content Skeleton */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        {/* Desktop Filters Sidebar Skeleton */}
-        <div className="hidden space-y-6 lg:block">
-          <div className="sticky top-4">
-            <div className="mb-4 flex items-center gap-2">
-              <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-5 w-16" />
-            </div>
-            <FiltersSkeleton />
-          </div>
-        </div>
-
-        {/* Products Grid Skeleton */}
-        <div className="space-y-6 lg:col-span-3">
-          <ProductGridSkeleton viewMode="grid" />
-          
-          {/* Pagination Skeleton */}
-          <div className="flex items-center justify-center space-x-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-10 rounded-md" />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function RouteComponent() {
   return (
-    <Suspense fallback={<CategoryPageSkeleton />}>
+    <Suspense fallback={<div>Loading...</div>}>
       <CategoryComponent />
     </Suspense>
   );

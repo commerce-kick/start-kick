@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { REQUESTED_LIMIT } from "@/integrations/salesforce/constants";
 import { getCustomerOrdersQueryOptions } from "@/integrations/salesforce/options/customer";
 import { Address } from "@/integrations/salesforce/types/api";
-import { formatAddress, formatCurrency } from "@/lib/commerce";
+import { formatAddress, formatCurrency } from "@/lib/commerce/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
