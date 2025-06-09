@@ -47,8 +47,6 @@ export const Route = createFileRoute("/category/$categoryId")({
   component: RouteComponent,
   loaderDeps: ({ search }) => search,
   loader: async ({ params, context, deps }) => {
-    console.log("loader");
-
     const { queryClient } = context;
 
     // Parse search params using shared utility (handles pipe separation)
