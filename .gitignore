@@ -25,3 +25,5 @@ routeTree.gen.ts
 /playwright/.cache/
 .tanstack
 .nitro
+.netlify
+dist
