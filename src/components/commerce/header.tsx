@@ -173,7 +173,7 @@ const ListItem = React.forwardRef<
           <div className="text-sm leading-none font-medium">{title}</div>
           {children && (
             <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-              {children}
+              {children as React.ReactNode}
             </p>
           )}
         </Link>

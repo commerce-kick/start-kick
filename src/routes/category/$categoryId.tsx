@@ -266,6 +266,12 @@ function CategoryComponent() {
     });
   };
 
+  const handleOffsetChange = (offset: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, offset }),
+    });
+  };
+
   const handleSelectedRefinement = (attributeId: string, value: string) => {
     const currentValues = refinements[attributeId] || [];
     const newValues = currentValues.includes(value)
@@ -473,7 +479,9 @@ function CategoryComponent() {
                 total={data.total}
                 offset={offset}
                 requestedLimit={REQUESTED_LIMIT}
-                navigate={navigateWeb}
+                onNext={handleOffsetChange}
+                onPrev={handleOffsetChange}
+                onGoToPage={handleOffsetChange}
               />
             </>
           ) : (

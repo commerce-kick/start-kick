@@ -143,6 +143,12 @@ function OrderHistoryContent() {
   const orders = data?.data || [];
   const totalOrders = data?.total || 0;
 
+  const handleOffsetChange = (offset: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, offset }),
+    });
+  };
+
   if (orders.length === 0) {
     return (
       <div className="space-y-6">
@@ -374,7 +380,9 @@ function OrderHistoryContent() {
         total={data.total}
         offset={data.offset}
         requestedLimit={REQUESTED_LIMIT}
-        navigate={navigate}
+        onNext={handleOffsetChange}
+        onPrev={handleOffsetChange}
+        onGoToPage={handleOffsetChange}
       />
     </div>
   );
