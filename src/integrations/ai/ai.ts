@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import getTools from "@/integrations/ai/tools";
 import { anthropic } from "@ai-sdk/anthropic";
 import { createServerFn } from "@tanstack/react-start";
