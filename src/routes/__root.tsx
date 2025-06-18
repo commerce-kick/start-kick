@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 
+import AIAssistant from "@/components/chat";
 import { Footer } from "@/components/commerce/footer";
 import { HeaderWithFallback } from "@/components/commerce/header-with-fallback";
 import { Toaster } from "@/components/ui/sonner";
@@ -81,6 +82,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <div className="flex min-h-screen flex-col">{children}</div>
 
         <Footer />
+
+        <AIAssistant />
 
         <Analytics />
         <SpeedInsights />

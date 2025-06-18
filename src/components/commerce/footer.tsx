@@ -1,4 +1,4 @@
-
+import AIAssistant from "@/components/chat";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
@@ -13,6 +13,8 @@ export function Footer() {
 
   return (
     <footer className="bg-muted/30 border-t">
+      <AIAssistant />
+
       {/* Newsletter Section */}
       <div className="bg-primary/5">
         <div className="container mx-auto flex flex-col items-center justify-between gap-8 py-12 md:flex-row">

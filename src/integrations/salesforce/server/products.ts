@@ -2,9 +2,26 @@ import { getSalesforceAPI } from "@/integrations/salesforce/server/config";
 import {
   GetProductParams,
   GetProductsByIdsParams,
-  ProductSearchParams,
 } from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+
+export const productSearchParamsSchema = z.object({
+  select: z.string().optional(),
+  q: z.string().optional(),
+  refine: z.array(z.string()).optional(),
+  sort: z.string().optional(),
+  currency: z.string().optional(),
+  locale: z.string().optional(),
+  expand: z.array(z.string()).optional(),
+  allImages: z.boolean().optional(),
+  perPricebook: z.boolean().optional(),
+  allVariationProperties: z.boolean().optional(),
+  offset: z.any().optional(),
+  limit: z.number().optional(),
+});
+
+export type ProductSearchParams = z.infer<typeof productSearchParamsSchema>;
 
 export const getProducts = createServerFn({ method: "GET" })
   .validator((data: ProductSearchParams) => data)
