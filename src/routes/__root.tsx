@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 
-import AIAssistant from "@/components/chat";
+import AIAssistant from "@/components/ai-assistant";
 import { Footer } from "@/components/commerce/footer";
 import { HeaderWithFallback } from "@/components/commerce/header-with-fallback";
 import { Toaster } from "@/components/ui/sonner";

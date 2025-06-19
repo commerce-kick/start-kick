@@ -1,4 +1,4 @@
-import AIAssistant from "@/components/chat";
+import AIAssistant from "@/components/ai-assistant";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
