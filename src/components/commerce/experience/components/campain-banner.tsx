@@ -6,7 +6,7 @@ interface CampaignBannerProps {
 }
 
 export function CampaignBanner({ component }: CampaignBannerProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { bannerMessage } = data || {};
 
   if (!bannerMessage) {

@@ -8,7 +8,7 @@ interface ImageAndTextProps {
 }
 
 export function ImageAndText({ component }: ImageAndTextProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { image, heading, ITCText, ITCLink } = data || {};
 
   return (

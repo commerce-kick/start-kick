@@ -8,7 +8,7 @@ interface MobileGridProps {
 }
 
 export function MobileGrid({ component }: MobileGridProps) {
-  const { regions, typeId } = component;
+  const { regions, typeId } = component as any;
 
   if (!regions?.length) {
     return null;

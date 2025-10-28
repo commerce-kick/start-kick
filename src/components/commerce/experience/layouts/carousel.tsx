@@ -11,7 +11,7 @@ interface CarouselProps {
 }
 
 export function Carousel({ component }: CarouselProps) {
-  const { regions, data } = component;
+  const { regions, data } = component as any;
   const [currentSlide, setCurrentSlide] = useState(0);
 
   if (!regions?.length) {

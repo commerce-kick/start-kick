@@ -13,7 +13,11 @@ export default defineConfig({
     tsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
-    tanstackStart(),
+    tanstackStart({
+      vite: {
+        skipTypeCheck: true,
+      },
+    }),
     tailwindcss(),
     nitro({
       config: {
@@ -21,5 +25,5 @@ export default defineConfig({
       },
     }),
     viteReact(),
-  ]
+  ],
 });

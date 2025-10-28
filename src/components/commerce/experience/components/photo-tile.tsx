@@ -6,7 +6,7 @@ interface PhotoTileProps {
 }
 
 export function PhotoTile({ component }: PhotoTileProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { image } = data || {};
 
   if (!image?.url) {

@@ -1,9 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-    ShopperCustomersTypes
-} from "commerce-sdk-isomorphic";
+import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 import { format } from "date-fns";
 
 export default function OrderDetails({
@@ -62,13 +60,13 @@ export default function OrderDetails({
             <div className="flex justify-between">
               <span className="text-muted-foreground">Payment Status:</span>
               <span className="font-medium capitalize">
-                {order.paymentStatus.replace("_", " ")}
+                {order.paymentStatus?.replace("_", " ")}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping Status:</span>
               <span className="font-medium capitalize">
-                {order.shippingStatus.replace("_", " ")}
+                {order.shippingStatus?.replace("_", " ")}
               </span>
             </div>
           </CardContent>

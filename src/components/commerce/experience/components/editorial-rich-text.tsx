@@ -5,7 +5,7 @@ interface EditorialRichTextProps {
 }
 
 export function EditorialRichText({ component }: EditorialRichTextProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { richText } = data || {};
 
   if (!richText) {

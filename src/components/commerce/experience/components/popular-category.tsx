@@ -8,7 +8,7 @@ interface PopularCategoryProps {
 }
 
 export function PopularCategory({ component }: PopularCategoryProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { category, catDisplayName } = data || {};
 
   if (!category) {

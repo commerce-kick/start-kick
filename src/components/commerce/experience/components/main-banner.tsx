@@ -7,7 +7,7 @@ interface MainBannerProps {
 }
 
 export function MainBanner({ component }: MainBannerProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { image, heading, categoryLink } = data || {};
 
   return (

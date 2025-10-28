@@ -118,10 +118,10 @@ const getStatusBadge = (
   const defaultConfig: StatusConfig = {
     variant: "outline",
     icon: AlertCircle,
-    label: status,
+    label: "created",
   };
 
-  const config = statusConfig[type][status] || defaultConfig;
+  const config = type && status ? statusConfig[type][status] : defaultConfig;
   const Icon = config.icon;
 
   return (

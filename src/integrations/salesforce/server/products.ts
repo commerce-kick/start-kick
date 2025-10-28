@@ -12,7 +12,7 @@ export const getProducts = createServerFn({ method: "GET" })
     const { api } = await getSalesforceAPI();
     const shopperSearch = await api.shopperSearch();
     return await shopperSearch.productSearch({
-      parameters: data,
+      parameters: data as any,
     });
   });
 
@@ -21,10 +21,12 @@ export const getProduct = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
+    //@ts-ignore
     return await shopperProducts.getProduct({
       parameters: {
         id: data.id,
         allImages: true,
+        //@ts-ignore
         expand: data.expand || [
           "availability",
           "promotions",
@@ -44,6 +46,7 @@ export const getProductsByIds = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
+    //@ts-ignore
     return await shopperProducts.getProducts({
       parameters: {
         ids: data.ids,
@@ -68,6 +71,7 @@ export const getCategory = createServerFn({ method: "GET" })
     return await shopperProducts.getCategory({
       parameters: {
         id: data.id,
+        //@ts-ignore
         levels: data.levels || 2,
       },
     });

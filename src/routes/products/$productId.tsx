@@ -51,13 +51,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { z } from "zod";
+import * as z from "zod";
 
 export const Route = createFileRoute("/products/$productId")({
   component: RouteComponent,
   validateSearch: z.object({
     pid: z.string().optional(),
-    variations: z.object(z.string()).optional(),
+    variations: z.record(z.string(), z.string()).optional(),
   }),
   loaderDeps: ({ search }) => ({ pid: search.pid }),
   loader: async ({ params, context, deps }) => {
@@ -377,13 +377,13 @@ function RouteComponent() {
 
     // Update URL with new variations and PID if variant is selected
     navigate({
-      search: (prev) => ({
-        ...prev,
-        variations:
-          Object.keys(newVariations).length > 0 ? newVariations : undefined,
-        pid: newSelectedVariant?.productId || undefined,
-      }),
-      replace: true,
+      search: (prev) => {
+        return ({
+          ...prev,
+          variations:  Object.keys(newVariations).length > 0 ? newVariations : undefined,
+          pid: newSelectedVariant?.productId || undefined
+        });
+      }
     });
   };
 

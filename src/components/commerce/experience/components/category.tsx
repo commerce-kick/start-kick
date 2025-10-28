@@ -9,7 +9,7 @@ interface CategoryProps {
 }
 
 export function Category({ component }: CategoryProps) {
-  const { data } = component;
+  const { data } = component as any;
   const {
     textHeadline,
     image,

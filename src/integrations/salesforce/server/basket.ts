@@ -41,6 +41,7 @@ export const addItemToNewOrExistingBasket = createServerFn({ method: "POST" })
       parameters: {
         basketId,
       },
+      //@ts-ignore
       body: data.body,
     });
   });

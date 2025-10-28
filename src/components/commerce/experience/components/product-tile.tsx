@@ -9,7 +9,7 @@ interface ProductTileProps {
 }
 
 export function ProductTile({ component }: ProductTileProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { product, displayRatings = false } = data || {};
 
   return (

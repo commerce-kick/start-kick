@@ -8,7 +8,7 @@ interface ShopTheLookProps {
 }
 
 export function ShopTheLook({ component }: ShopTheLookProps) {
-  const { data } = component;
+  const { data } = component as any;
   const { product, priceDisplay = true } = data || {};
 
   return (

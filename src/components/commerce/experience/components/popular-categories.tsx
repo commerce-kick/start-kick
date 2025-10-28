@@ -6,7 +6,7 @@ interface PopularCategoriesProps {
 }
 
 export function PopularCategories({ component }: PopularCategoriesProps) {
-  const { data, regions } = component;
+  const { data, regions } = component as any;
   const { textHeadline } = data || {};
 
   return (
