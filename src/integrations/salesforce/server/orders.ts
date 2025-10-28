@@ -3,7 +3,7 @@ import { CreateOrderParams } from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
 
 export const createOrder = createServerFn({ method: "POST" })
-  .validator((data: CreateOrderParams) => data)
+  .inputValidator((data: CreateOrderParams) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
     const shopperOrders = await api.shopperOrders();
@@ -16,7 +16,7 @@ export const createOrder = createServerFn({ method: "POST" })
   });
 
 export const getOrder = createServerFn({ method: "GET" })
-  .validator((data: { orderNo: string }) => data)
+  .inputValidator((data: { orderNo: string }) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperOrders = await api.shopperOrders();

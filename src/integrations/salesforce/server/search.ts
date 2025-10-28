@@ -3,7 +3,7 @@ import { SearchSuggestionsParams } from "@/integrations/salesforce/types/params"
 import { createServerFn } from "@tanstack/react-start";
 
 export const getSearchSuggestions = createServerFn({ method: "GET" })
-  .validator((data: SearchSuggestionsParams) => data)
+  .inputValidator((data: SearchSuggestionsParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperSearch = await api.shopperSearch();

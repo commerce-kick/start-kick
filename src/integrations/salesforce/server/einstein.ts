@@ -15,7 +15,7 @@ const instace = axios.create({
 });
 
 export const getProductRecs = createServerFn({ method: "POST" })
-  .validator((data: { recId: string; products: { id: string }[] }) => data)
+  .inputValidator((data: { recId: string; products: { id: string }[] }) => data)
   .handler(async ({ data }) => {
     const { data: response } = await instace.post(
       `/v3/personalization/recs/${config.siteId}/${data.recId}`,

@@ -1,7 +1,5 @@
 import type { SalesforceCommerceClient } from "@/integrations/salesforce/client";
-import SDK from "commerce-sdk-isomorphic";
-
-const {
+import {
   ShopperBaskets,
   ShopperContexts,
   ShopperCustomers,
@@ -12,9 +10,9 @@ const {
   ShopperPromotions,
   ShopperGiftCertificates,
   ShopperSearch,
-  ShopperSeo,
+  ShopperSEO,
   ShopperStores,
-} = SDK;
+} from "commerce-sdk-isomorphic";
 
 export class SalesforceAPI {
   private client: SalesforceCommerceClient;
@@ -56,78 +54,78 @@ export class SalesforceAPI {
   }
 
   async shopperBaskets() {
-    return this.getClient<SDK.ShopperBaskets<any>>(
+    return this.getClient<ShopperBaskets<any>>(
       ShopperBaskets,
       "shopperBaskets",
     );
   }
 
   async shopperContexts() {
-    return this.getClient<SDK.ShopperContexts<any>>(
+    return this.getClient<ShopperContexts<any>>(
       ShopperContexts,
       "shopperContexts",
     );
   }
 
   async shopperCustomers() {
-    return this.getClient<SDK.ShopperCustomers<any>>(
+    return this.getClient<ShopperCustomers<any>>(
       ShopperCustomers,
       "shopperCustomers",
     );
   }
 
   async shopperExperience() {
-    return this.getClient<SDK.ShopperExperience<any>>(
+    return this.getClient<ShopperExperience<any>>(
       ShopperExperience,
       "shopperExperience",
     );
   }
 
   async shopperLogin() {
-    return this.getClient<SDK.ShopperLogin<any>>(ShopperLogin, "shopperLogin");
+    return this.getClient<ShopperLogin<any>>(ShopperLogin, "shopperLogin");
   }
 
   async shopperOrders() {
-    return this.getClient<SDK.ShopperOrders<any>>(
+    return this.getClient<ShopperOrders<any>>(
       ShopperOrders,
       "shopperOrders",
     );
   }
 
   async shopperProducts() {
-    return this.getClient<SDK.ShopperProducts<any>>(
+    return this.getClient<ShopperProducts<any>>(
       ShopperProducts,
       "shopperProducts",
     );
   }
 
   async shopperPromotions() {
-    return this.getClient<SDK.ShopperPromotions<any>>(
+    return this.getClient<ShopperPromotions<any>>(
       ShopperPromotions,
       "shopperPromotions",
     );
   }
 
   async shopperGiftCertificates() {
-    return this.getClient<SDK.ShopperGiftCertificates<any>>(
+    return this.getClient<ShopperGiftCertificates<any>>(
       ShopperGiftCertificates,
       "shopperGiftCertificates",
     );
   }
 
   async shopperSearch() {
-    return this.getClient<SDK.ShopperSearch<any>>(
+    return this.getClient<ShopperSearch<any>>(
       ShopperSearch,
       "shopperSearch",
     );
   }
 
   async shopperSeo() {
-    return this.getClient<SDK.ShopperSeo<any>>(ShopperSeo, "shopperSeo");
+    return this.getClient<ShopperSEO<any>>(ShopperSEO, "shopperSeo");
   }
 
   async shopperStores() {
-    return this.getClient<SDK.ShopperStores<any>>(
+    return this.getClient<ShopperStores<any>>(
       ShopperStores,
       "shopperStores",
     );

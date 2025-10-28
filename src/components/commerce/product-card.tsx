@@ -180,7 +180,7 @@ export default function ProductCard({
             <div className="relative aspect-square overflow-hidden bg-gray-50">
               <Image
                 layout="fullWidth"
-                src={primaryImage || "/placeholder.svg?height=200&width=200"}
+                src={primaryImage || "/placeholder.jpg"}
                 alt={imageAlt}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={handleImageError}

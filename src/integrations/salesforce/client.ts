@@ -1,13 +1,12 @@
 import { SalesforceSessionManager } from "@/integrations/salesforce/session-manager";
 import { SalesforceConfig } from "@/integrations/salesforce/types/params";
-import SDK from "commerce-sdk-isomorphic";
 
-const { ShopperLogin, helpers } = SDK;
+import { ShopperLogin, helpers } from "commerce-sdk-isomorphic";
 
 export class SalesforceCommerceClient {
   private config: SalesforceConfig;
   private sessionManager: SalesforceSessionManager;
-  private shopperLogin: SDK.ShopperLogin<any>;
+  private shopperLogin: ShopperLogin<any>;
 
   constructor(config: SalesforceConfig, session: any) {
     this.config = config;
@@ -46,8 +45,11 @@ export class SalesforceCommerceClient {
   }
 
   async authenticateAsGuest(): Promise<void> {
-    const response = await helpers.loginGuestUser(this.shopperLogin, {
-      redirectURI: `${process.env.VITE_APP_URL || "http://localhost:3000"}/callback`,
+    const response = await helpers.loginGuestUser({
+      slasClient: this.shopperLogin,
+      parameters: {
+        redirectURI: `${process.env.VITE_APP_URL || "http://localhost:3000"}/callback`,
+      },
     });
 
     await this.sessionManager.saveTokens({
@@ -63,8 +65,9 @@ export class SalesforceCommerceClient {
     const tokens = await this.sessionManager.getTokens();
     if (!tokens?.refreshToken) throw new Error("No refresh token available");
 
-    const response = await helpers.refreshAccessToken(this.shopperLogin, {
-      refreshToken: tokens.refreshToken,
+    const response = await helpers.refreshAccessToken({
+      slasClient: this.shopperLogin,
+      parameters: { refreshToken: tokens.refreshToken },
     });
 
     await this.sessionManager.saveTokens({
@@ -83,17 +86,17 @@ export class SalesforceCommerceClient {
     await this.ensureAuthenticated();
     const { usid } = await this.sessionManager.getTokens();
 
-    const response = await helpers.loginRegisteredUserB2C(
-      this.shopperLogin,
-      {
+    const response = await helpers.loginRegisteredUserB2C({
+      slasClient: this.shopperLogin,
+      credentials: {
         username: username,
         password: password,
       },
-      {
+      parameters: {
         redirectURI: "http://localhost:3000/callback",
         usid: usid,
       },
-    );
+    });
 
     await this.sessionManager.saveTokens({
       accessToken: response.access_token,
@@ -105,8 +108,9 @@ export class SalesforceCommerceClient {
   }
 
   async logout(): Promise<void> {
-    const response = await helpers.loginGuestUser(this.shopperLogin, {
-      redirectURI: "http://localhost:3000/callback",
+    const response = await helpers.loginGuestUser({
+      slasClient: this.shopperLogin,
+      parameters: { redirectURI: "http://localhost:3000/callback" },
     });
 
     await this.sessionManager.saveTokens({

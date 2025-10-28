@@ -1,10 +1,11 @@
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/not-found";
 import { MutationCache, QueryClient, QueryKey } from "@tanstack/react-query";
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
-import { routerWithQueryClient } from "@tanstack/react-router-with-query";
+import { createRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { routeTree } from "./routeTree.gen";
+
+import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 declare module "@tanstack/react-query" {
   interface Register {
@@ -16,7 +17,7 @@ declare module "@tanstack/react-query" {
   }
 }
 
-export function createRouter() {
+export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -44,18 +45,19 @@ export function createRouter() {
     }),
   });
 
-  return routerWithQueryClient(
-    createTanStackRouter({
-      routeTree,
-      context: { queryClient },
-      defaultPreload: "intent",
-      defaultErrorComponent: DefaultCatchBoundary,
-      defaultNotFoundComponent: () => <NotFound />,
-      scrollRestoration: true,
-      scrollRestorationBehavior: "smooth",
-    }),
+  const router = createRouter({
+    routeTree,
+    context: { queryClient },
+    defaultPreload: "intent",
+    defaultErrorComponent: DefaultCatchBoundary,
+    defaultNotFoundComponent: () => <NotFound />,
+  });
+  setupRouterSsrQueryIntegration({
+    router,
     queryClient,
-  );
+  });
+
+  return router;
 }
 
 declare module "@tanstack/react-router" {

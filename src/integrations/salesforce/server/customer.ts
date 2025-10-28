@@ -13,7 +13,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { ShopperCustomersTypes } from "commerce-sdk-isomorphic";
 
 export const authenticateCustomer = createServerFn({ method: "POST" })
-  .validator((data: { username: string; password: string }) => data)
+  .inputValidator((data: { username: string; password: string }) => data)
   .handler(async ({ data }) => {
     const session = await useAppSession();
     const client = new SalesforceCommerceClient(salesforceConfig, session);
@@ -22,7 +22,7 @@ export const authenticateCustomer = createServerFn({ method: "POST" })
   });
 
 export const registerCustomer = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     (data: {
       email: string;
       firstName: string;
@@ -87,7 +87,7 @@ export const customerProductLists = createServerFn({ method: "GET" }).handler(
 );
 
 export const createProductList = createServerFn({ method: "POST" })
-  .validator((data: { type: ProductListTypes }) => data)
+  .inputValidator((data: { type: ProductListTypes }) => data)
   .handler(async ({ data }) => {
     const { data: sessionData } = await useAppSession();
     const { api } = await getSalesforceAPI();
@@ -105,7 +105,7 @@ export const createProductList = createServerFn({ method: "POST" })
   });
 
 export const addItemToProductList = createServerFn({ method: "POST" })
-  .validator((data: { listId: string; productId: string }) => data)
+  .inputValidator((data: { listId: string; productId: string }) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const { data: sessionData } = await useAppSession();
@@ -128,7 +128,7 @@ export const addItemToProductList = createServerFn({ method: "POST" })
   });
 
 export const getCustomerOrders = createServerFn({ method: "GET" })
-  .validator((data: CustomerOrdersParams) => data)
+  .inputValidator((data: CustomerOrdersParams) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
     const shopperCustomers = await api.shopperCustomers();
@@ -143,7 +143,7 @@ export const getCustomerOrders = createServerFn({ method: "GET" })
   });
 
 export const createCustomerAddress = createServerFn({ method: "POST" })
-  .validator((data: CreateCustomerAddressParams) => data)
+  .inputValidator((data: CreateCustomerAddressParams) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
     const shopperCustomers = await api.shopperCustomers();
@@ -158,7 +158,7 @@ export const createCustomerAddress = createServerFn({ method: "POST" })
   });
 
 export const updateCustomerAddress = createServerFn({ method: "POST" })
-  .validator((data: CreateCustomerAddressParams) => data)
+  .inputValidator((data: CreateCustomerAddressParams) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
     const shopperCustomers = await api.shopperCustomers();
@@ -174,7 +174,7 @@ export const updateCustomerAddress = createServerFn({ method: "POST" })
   });
 
 export const deleteCustomerAddress = createServerFn({ method: "POST" })
-  .validator((data: { addressId: string }) => data)
+  .inputValidator((data: { addressId: string }) => data)
   .handler(async ({ data }) => {
     const { api, client } = await getSalesforceAPI();
     const shopperCustomers = await api.shopperCustomers();
@@ -189,7 +189,7 @@ export const deleteCustomerAddress = createServerFn({ method: "POST" })
   });
 
 export const deleteItemFormProductList = createServerFn({ method: "POST" })
-  .validator((data: { listId: string; itemId: string }) => data)
+  .inputValidator((data: { listId: string; itemId: string }) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const { data: sessionData } = await useAppSession();

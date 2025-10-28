@@ -57,7 +57,7 @@ export const Route = createFileRoute("/products/$productId")({
   component: RouteComponent,
   validateSearch: z.object({
     pid: z.string().optional(),
-    variations: z.record(z.string()).optional(),
+    variations: z.object(z.string()).optional(),
   }),
   loaderDeps: ({ search }) => ({ pid: search.pid }),
   loader: async ({ params, context, deps }) => {

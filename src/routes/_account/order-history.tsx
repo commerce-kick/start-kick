@@ -49,8 +49,8 @@ export const Route = createFileRoute("/_account/order-history")({
 });
 
 const getStatusBadge = (
-  status: string,
-  type: "order" | "payment" | "shipping" | "confirmation",
+  status?: string,
+  type?: "order" | "payment" | "shipping" | "confirmation",
 ) => {
   const statusConfig: StatusTypeMap = {
     order: {

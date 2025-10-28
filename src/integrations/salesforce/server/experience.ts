@@ -3,7 +3,7 @@ import { GetPageParams } from "@/integrations/salesforce/types/params";
 import { createServerFn } from "@tanstack/react-start";
 
 export const getPage = createServerFn({ method: "POST" })
-  .validator((data: GetPageParams) => data)
+  .inputValidator((data: GetPageParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperExperience = await api.shopperExperience();

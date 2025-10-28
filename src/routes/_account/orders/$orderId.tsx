@@ -152,7 +152,6 @@ function OrderDetailsContent() {
   const confirmationStatus = order.confirmationStatus || "not_confirmed";
 
   const isShipped = shippingStatus === "shipped";
-  const isDelivered = shippingStatus === "delivered";
   const isCancelled = orderStatus === "cancelled";
 
   return (
@@ -204,7 +203,7 @@ function OrderDetailsContent() {
       </div>
 
       {/* Tracking Information (if shipped) */}
-      {isShipped && !isDelivered && !isCancelled && (
+      {isShipped && !isCancelled && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">

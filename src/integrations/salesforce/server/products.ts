@@ -7,7 +7,7 @@ import {
 import { createServerFn } from "@tanstack/react-start";
 
 export const getProducts = createServerFn({ method: "GET" })
-  .validator((data: ProductSearchParams) => data)
+  .inputValidator((data: ProductSearchParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperSearch = await api.shopperSearch();
@@ -17,7 +17,7 @@ export const getProducts = createServerFn({ method: "GET" })
   });
 
 export const getProduct = createServerFn({ method: "GET" })
-  .validator((data: GetProductParams) => data)
+  .inputValidator((data: GetProductParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
@@ -40,7 +40,7 @@ export const getProduct = createServerFn({ method: "GET" })
   });
 
 export const getProductsByIds = createServerFn({ method: "GET" })
-  .validator((data: GetProductsByIdsParams) => data)
+  .inputValidator((data: GetProductsByIdsParams) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
@@ -61,7 +61,7 @@ export const getProductsByIds = createServerFn({ method: "GET" })
   });
 
 export const getCategory = createServerFn({ method: "GET" })
-  .validator((data: { id: string; levels?: number }) => data)
+  .inputValidator((data: { id: string; levels?: number }) => data)
   .handler(async ({ data }) => {
     const { api } = await getSalesforceAPI();
     const shopperProducts = await api.shopperProducts();
