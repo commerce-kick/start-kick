@@ -1,4 +1,5 @@
 // app/routes/index.tsx
+import { Chat } from "@/components/chat";
 import ProductCard from "@/components/commerce/product-card";
 import HoverBox from "@/components/magic/hover-box";
 import { InteractiveGridPattern } from "@/components/magic/interactive-pattern";
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  
   const { data: products } = useSuspenseQuery(
     getProductsQueryOptions({
       refine: ["cgid=root"],
@@ -240,6 +242,8 @@ function Home() {
           </Button>
         </div>
       </section>
+
+      <Chat />
     </div>
   );
 }

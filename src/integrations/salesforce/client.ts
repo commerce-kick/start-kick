@@ -90,10 +90,7 @@ export class SalesforceCommerceClient {
 
     const response = await helpers.loginRegisteredUserB2C({
       slasClient: this.shopperLogin,
-      credentials: {
-        username: username,
-        password: password,
-      },
+      credentials: { username: username, password: password },
       parameters: {
         redirectURI: "http://localhost:3000/callback",
         usid: usid,
@@ -112,7 +109,9 @@ export class SalesforceCommerceClient {
   async logout(): Promise<void> {
     const response = await helpers.loginGuestUser({
       slasClient: this.shopperLogin,
-      parameters: { redirectURI: "http://localhost:3000/callback" },
+      parameters: {
+        redirectURI: "http://localhost:3000/callback",
+      },
     });
 
     await this.sessionManager.saveTokens({
