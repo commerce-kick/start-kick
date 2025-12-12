@@ -51,11 +51,11 @@ This project is a full-featured e-commerce application that demonstrates best pr
 
 3. Create a `.env` file in the root directory with your Salesforce Commerce Cloud credentials:
    ```
-   VITE_SFCC_CLIENT_ID=your-client-id
-   VITE_SFCC_ORG_ID=your-org-id
-   VITE_SFCC_SHORT_CODE=your-short-code
-   VITE_SFCC_SITE_ID=your-site-id
-   VITE_APP_URL=http://localhost:3000
+   SFCC_CLIENT_ID=your-client-id
+   SFCC_ORG_ID=your-org-id
+   SFCC_SHORT_CODE=your-short-code
+   SFCC_SITE_ID=your-site-id
+   APP_URL=http://localhost:3000
    SESSION_SECRET=your-session-secret
    ```
 

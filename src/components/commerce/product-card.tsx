@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { applyDISConfig } from "@/lib/commerce/dis";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import type {
@@ -61,11 +62,16 @@ function normalizeProduct(product: ProductLike): NormalizedProduct {
 
   if (isSearchHit) {
     const searchHit = product as ShopperSearchTypes.ProductSearchHit;
+    const baseImageUrl =
+      searchHit.image?.disBaseLink ||
+      searchHit.imageGroups?.[0]?.images?.[0]?.disBaseLink;
+
     return {
       id: searchHit.productId,
       name: searchHit.productName || `Product ${searchHit.productId}`,
-      image:
-        searchHit.image?.link || searchHit.imageGroups?.[0]?.images?.[0]?.link,
+      image: baseImageUrl
+        ? applyDISConfig(baseImageUrl, { w: 400 })
+        : baseImageUrl,
       imageAlt: searchHit.image?.alt || searchHit.productName,
       price: searchHit.price,
       priceMax: searchHit.priceMax,
@@ -77,10 +83,13 @@ function normalizeProduct(product: ProductLike): NormalizedProduct {
     };
   } else {
     const productData = product as ShopperProductsTypes.Product;
+    const baseImageUrl = productData.imageGroups?.[0]?.images?.[0]?.disBaseLink;
     return {
       id: productData.id,
       name: productData.name || `Product ${productData.id}`,
-      image: productData.imageGroups?.[0]?.images?.[0]?.link,
+      image: baseImageUrl
+        ? applyDISConfig(baseImageUrl, { w: 400 })
+        : baseImageUrl,
       imageAlt: productData.name,
       price: productData.price,
       priceMax: productData.priceMax,

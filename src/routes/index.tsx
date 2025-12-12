@@ -69,7 +69,7 @@ function Home() {
         <div className="absolute inset-0 flex w-full items-start justify-center">
           <InteractiveGridPattern
             className={cn(
-              "[mask-image:radial-gradient(500px_circle_at_top_center,white,transparent)]",
+              "mask-[radial-gradient(500px_circle_at_top_center,white,transparent)]",
               "relative h-auto w-auto",
             )}
             width={50}

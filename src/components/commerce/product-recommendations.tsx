@@ -20,7 +20,7 @@ export function ProductRecommendations({
     getProductRecsQueryOptions({ recId, products }),
   );
 
-  if (isLoading || !data.recs) {
+  if (isLoading || !data?.recs) {
     return <></>;
   }
 

@@ -2,9 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import axios from "axios";
 
 const config = {
-  siteId: process.env.VITE_EINSTEIN_SITE,
-  host: process.env.VITE_EINSTEIN_HOST,
-  id: process.env.VITE_EINSTEIN_ID,
+  siteId: process.env.EINSTEIN_SITE,
+  host: process.env.EINSTEIN_HOST,
+  id: process.env.EINSTEIN_ID,
 };
 
 const instace = axios.create({
