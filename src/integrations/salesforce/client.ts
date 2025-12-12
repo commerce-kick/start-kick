@@ -1,7 +1,7 @@
 import { SalesforceSessionManager } from "@/integrations/salesforce/session-manager";
 import { SalesforceConfig } from "@/integrations/salesforce/types/params";
 
-import { ShopperLogin, helpers } from "commerce-sdk-isomorphic";
+import { ShopperLogin, helpers } from "./sdk";
 
 export class SalesforceCommerceClient {
   private config: SalesforceConfig;
@@ -67,7 +67,9 @@ export class SalesforceCommerceClient {
 
     const response = await helpers.refreshAccessToken({
       slasClient: this.shopperLogin,
-      parameters: { refreshToken: tokens.refreshToken },
+      parameters: {
+        refreshToken: tokens.refreshToken,
+      },
     });
 
     await this.sessionManager.saveTokens({

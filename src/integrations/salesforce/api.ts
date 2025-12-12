@@ -4,15 +4,15 @@ import {
   ShopperContexts,
   ShopperCustomers,
   ShopperExperience,
+  ShopperGiftCertificates,
   ShopperLogin,
   ShopperOrders,
   ShopperProducts,
   ShopperPromotions,
-  ShopperGiftCertificates,
   ShopperSearch,
   ShopperSEO,
   ShopperStores,
-} from "commerce-sdk-isomorphic";
+} from "./sdk";
 
 export class SalesforceAPI {
   private client: SalesforceCommerceClient;
@@ -86,10 +86,7 @@ export class SalesforceAPI {
   }
 
   async shopperOrders() {
-    return this.getClient<ShopperOrders<any>>(
-      ShopperOrders,
-      "shopperOrders",
-    );
+    return this.getClient<ShopperOrders<any>>(ShopperOrders, "shopperOrders");
   }
 
   async shopperProducts() {
@@ -114,10 +111,7 @@ export class SalesforceAPI {
   }
 
   async shopperSearch() {
-    return this.getClient<ShopperSearch<any>>(
-      ShopperSearch,
-      "shopperSearch",
-    );
+    return this.getClient<ShopperSearch<any>>(ShopperSearch, "shopperSearch");
   }
 
   async shopperSeo() {
@@ -125,10 +119,7 @@ export class SalesforceAPI {
   }
 
   async shopperStores() {
-    return this.getClient<ShopperStores<any>>(
-      ShopperStores,
-      "shopperStores",
-    );
+    return this.getClient<ShopperStores<any>>(ShopperStores, "shopperStores");
   }
 
   // Helper method to manually refresh if needed
